@@ -193,14 +193,14 @@ class MainActivity : ComponentActivity() {
 
     private val requestCamera = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted && startAfterPermission) startTracking()
-        else if (!granted) status = "Для рук нужен доступ к камере"
+        else if (!granted) status = tr("Для рук нужен доступ к камере")
         startAfterPermission = false
     }
     private val scanCardboard = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode != RESULT_OK) return@registerForActivityResult
         val mm = result.data?.getIntExtra(CardboardQrActivity.EXTRA_IPD_MM, -1) ?: -1
         if (mm !in Settings.MIN_IPD_MM..Settings.MAX_IPD_MM) {
-            error = "Профиль Cardboard не содержит корректное межзрачковое расстояние"
+            error = tr("Профиль Cardboard не содержит корректное межзрачковое расстояние")
         } else {
             ipd = mm
             Settings.setIpdMm(this, mm)
@@ -245,11 +245,11 @@ class MainActivity : ComponentActivity() {
         val source = pendingPxr.also { pendingPxr = null }
         if (uri != null && source != null) runCatching {
             contentResolver.openOutputStream(uri)?.use { out -> source.inputStream().use { it.copyTo(out) } }
-        }.onFailure { error = "Не удалось сохранить .pxr" }
+        }.onFailure { error = tr("Не удалось сохранить .pxr") }
     }
     private val chooseForPxr = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri == null) return@registerForActivityResult
-        busy = "Сборка .pxr…"
+        busy = tr("Сборка .pxr…")
         Thread {
             runCatching {
                 val payload = PxrPackage.androidPayload(this, uri)
@@ -258,7 +258,7 @@ class MainActivity : ComponentActivity() {
             }.onSuccess { file ->
                 runOnUiThread { busy = null; pendingPxr = file; savePxr.launch(file.name) }
             }.onFailure { failure ->
-                runOnUiThread { busy = null; error = failure.localizedMessage ?: "Не удалось собрать .pxr" }
+                runOnUiThread { busy = null; error = failure.localizedMessage ?: tr("Не удалось собрать .pxr") }
             }
         }.start()
     }
@@ -400,22 +400,22 @@ class MainActivity : ComponentActivity() {
     private fun MenuTab() {
         HigPage(
             title = "PhoneXR",
-            subtitle = "VR на телефоне: руки в камере, Joy‑Con вместо контроллеров",
+            subtitle = tr("VR на телефоне: руки в камере, Joy‑Con вместо контроллеров"),
             bottomInset = TAB_BAR_ROOM
         ) {
             if (!sixDof) HigSection(
-                title = "Сейчас работает 3DoF",
-                footer = "Поворот головы и контроллеры работают, но перемещение по комнате, граница, стены, столы и физика комнаты требуют 6DoF."
+                title = tr("Сейчас работает 3DoF"),
+                footer = tr("Поворот головы и контроллеры работают, но перемещение по комнате, граница, стены, столы и физика комнаты требуют 6DoF.")
             ) {
-                HigLink("Включить 6DoF") {
-                    if (BuildConfig.LITE) error = "6DoF доступен в PhoneXR Full"
+                HigLink(tr("Включить 6DoF")) {
+                    if (BuildConfig.LITE) error = tr("6DoF доступен в PhoneXR Full")
                     else {
                         sixDof = true
                         Settings.save(this@MainActivity, Settings.load(this@MainActivity).copy(sixDof = true))
                     }
                 }
             }
-            HigSection(footer = "VR‑дом в смешанной реальности: щипок — открыть, кулак — перетащить иконки, ладонь к лицу + щипок — меню. Joy‑Con: ZR или A.") {
+            HigSection(footer = tr("VR‑дом в смешанной реальности: щипок — открыть, кулак — перетащить иконки, ладонь к лицу + щипок — меню. Joy‑Con: ZR или A.")) {
                 HigLink(tr("Войти в VR")) {
                     enterVr.launch(
                         if (android.os.Build.VERSION.SDK_INT >= 33) arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.RECORD_AUDIO)
@@ -426,22 +426,22 @@ class MainActivity : ComponentActivity() {
 
             HigSection(
                 title = tr("Игры"),
-                footer = "Нажмите на игру, чтобы включить трекинг и запустить её. " +
-                    "Игры Gear VR и сборки для гарнитур сначала нужно пропатчить: PhoneXR откроет им рантайм " +
-                    "PhoneXR, впишет новый трекинг и оптимизирует их под телефон."
+                footer = tr("Нажмите на игру, чтобы включить трекинг и запустить её. ") +
+                    tr("Игры Gear VR и сборки для гарнитур сначала нужно пропатчить: PhoneXR откроет им рантайм ") +
+                    tr("PhoneXR, впишет новый трекинг и оптимизирует их под телефон.")
             ) {
                 val list = games
                 when {
-                    list == null -> HigRow("Поиск игр…", trailing = { HigSpinner() })
-                    list.isEmpty() -> HigRow("VR-игры не найдены", "Установите игру из магазина или из файла")
+                    list == null -> HigRow(tr("Поиск игр…"), trailing = { HigSpinner() })
+                    list.isEmpty() -> HigRow(tr("VR-игры не найдены"), tr("Установите игру из магазина или из файла"))
                     else -> list.forEach { game -> GameRow(game) }
                 }
             }
 
             HigSection(
                 title = tr("Установка"),
-                footer = "APK OpenXR-игры, игры Gear VR (64 и 32 бита) или пакет .pxr. " +
-                    "PhoneXR впишет новый трекинг, оптимизирует сборку под телефон, подпишет её и откроет установку."
+                footer = tr("APK OpenXR-игры, игры Gear VR (64 и 32 бита) или пакет .pxr. ") +
+                    tr("PhoneXR впишет новый трекинг, оптимизирует сборку под телефон, подпишет её и откроет установку.")
             ) {
                 HigLink(busy ?: tr("Установить игру из файла"), enabled = busy == null) {
                     chooseApk.launch(
@@ -449,7 +449,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
                 HigLink(tr("Магазин игр")) { selectTab(1) }
-                HigLink("Собрать .pxr из APK", enabled = busy == null) {
+                HigLink(tr("Собрать .pxr из APK"), enabled = busy == null) {
                     chooseForPxr.launch(arrayOf("application/vnd.android.package-archive", "application/octet-stream"))
                 }
             }
@@ -458,20 +458,20 @@ class MainActivity : ComponentActivity() {
 
             HigSection(
                 title = "Daydream",
-                footer = "Игры Daydream ищут Google VR Services. PhoneXR ставит Opendream Services 1.13 — " +
-                    "после этого игры Daydream и Cardboard появляются в списке игр и в VR‑доме."
+                footer = tr("Игры Daydream ищут Google VR Services. PhoneXR ставит Opendream Services 1.13 — ") +
+                    tr("после этого игры Daydream и Cardboard появляются в списке игр и в VR‑доме.")
             ) {
                 if (Daydream.servicesInstalled(this@MainActivity)) {
-                    HigRow("VR Services", "Opendream установлен")
+                    HigRow("VR Services", tr("Opendream установлен"))
                 } else {
-                    HigLink("Установить Opendream Services") { Daydream.installServices(this@MainActivity) }
+                    HigLink(tr("Установить Opendream Services")) { Daydream.installServices(this@MainActivity) }
                 }
             }
 
             HigSection(title = tr("Трекинг"), footer = status) {
                 HigLink(tr("Остановить трекинг")) {
                     stopService(Intent(this@MainActivity, HandTrackingService::class.java))
-                    status = "Трекинг остановлен"
+                    status = tr("Трекинг остановлен")
                 }
             }
         }
@@ -483,16 +483,16 @@ class MainActivity : ComponentActivity() {
         val state = if (resumes >= 0) PhoneXrRuntime.state(this) else PhoneXrRuntime.State.MISSING
         HigSection(
             title = "OpenXR",
-            footer = "PhoneXR Runtime заменяет Monado: OpenXR‑игры получают руки, Joy‑Con и голову от PhoneXR. " +
-                "После установки выберите «PhoneXR Runtime» в OpenXR Runtime Broker."
+            footer = tr("PhoneXR Runtime заменяет Monado: OpenXR‑игры получают руки, Joy‑Con и голову от PhoneXR. ") +
+                tr("После установки выберите «PhoneXR Runtime» в OpenXR Runtime Broker.")
         ) {
             when (state) {
-                PhoneXrRuntime.State.READY -> HigRow("PhoneXR Runtime", "Установлен")
-                PhoneXrRuntime.State.OUTDATED -> HigLink("Обновить PhoneXR Runtime") { PhoneXrRuntime.install(this@MainActivity) }
+                PhoneXrRuntime.State.READY -> HigRow("PhoneXR Runtime", tr("Установлен"))
+                PhoneXrRuntime.State.OUTDATED -> HigLink(tr("Обновить PhoneXR Runtime")) { PhoneXrRuntime.install(this@MainActivity) }
                 PhoneXrRuntime.State.MISSING -> if (PhoneXrRuntime.bundled(this@MainActivity)) {
-                    HigLink("Установить PhoneXR Runtime") { PhoneXrRuntime.install(this@MainActivity) }
+                    HigLink(tr("Установить PhoneXR Runtime")) { PhoneXrRuntime.install(this@MainActivity) }
                 } else {
-                    HigRow("PhoneXR Runtime", "Не входит в эту сборку")
+                    HigRow("PhoneXR Runtime", tr("Не входит в эту сборку"))
                 }
             }
             HigLink(
@@ -539,22 +539,22 @@ class MainActivity : ComponentActivity() {
     private fun StoreTab() {
         HigPage(
             title = tr("Магазин"),
-            subtitle = "OpenXR, Quest и Pico: PhoneXR сам скачает и подготовит APK.",
+            subtitle = tr("OpenXR, Quest и Pico: PhoneXR сам скачает и подготовит APK."),
             bottomInset = TAB_BAR_ROOM
         ) {
             HigSection(
                 title = tr("VR‑режимы"),
-                footer = "Обычные Minecraft и Roblox на большом экране в VR: своя комната, поворот головы, " +
-                    "игра двумя руками или Joy‑Con. Нажмите на режим — появится инструкция."
+                footer = tr("Обычные Minecraft и Roblox на большом экране в VR: своя комната, поворот головы, ") +
+                    tr("игра двумя руками или Joy‑Con. Нажмите на режим — появится инструкция.")
             ) {
                 VR_MODES.forEach { mode -> VrModeRow(mode) }
             }
             HigSection(
                 title = tr("Приложения PhoneXR"),
-                footer = "Android‑приложения: любые приложения телефона окнами в VR (нужен Shizuku). Появляется на главном экране VR."
+                footer = tr("Android‑приложения: любые приложения телефона окнами в VR (нужен Shizuku). Появляется на главном экране VR.")
             ) {
                 val added = resumes >= 0 && androidApps
-                HigLink(tr("Android‑приложения"), value = if (BuildConfig.LITE) "Включено" else if (added) tr("Удалить") else tr("Получить")) {
+                HigLink(tr("Android‑приложения"), value = if (BuildConfig.LITE) tr("Включено") else if (added) tr("Удалить") else tr("Получить")) {
                     if (!BuildConfig.LITE) {
                         androidApps = !added
                         AndroidAppsContent.setEnabled(this@MainActivity, !added)
@@ -564,7 +564,7 @@ class MainActivity : ComponentActivity() {
             HigSection(
                 title = tr("Моды Minecraft"),
                 footer = tr("Дополнения, наборы ресурсов и миры для Minecraft Bedrock (.mcaddon, .mcpack, .mcworld). " +
-                    "Minecraft сам импортирует мод, потом включите его в настройках мира.")
+                    tr("Minecraft сам импортирует мод, потом включите его в настройках мира."))
             ) {
                 HigLink("PhoneXR VR — VR для Minecraft", value = if (resumes >= 0 && MinecraftBridge.modInstalled(this@MainActivity)) "✓" else tr("Установить")) {
                     MinecraftBridge.installMod(this@MainActivity)?.let { error = it }
@@ -586,20 +586,20 @@ class MainActivity : ComponentActivity() {
             ) {
                 when {
                     storeLoading && items == null -> HigRow(tr("Загрузка…"), trailing = { HigSpinner() })
-                    items.isNullOrEmpty() -> HigRow(if (storeError != null) "Магазин недоступен" else tr("Пока пусто"))
+                    items.isNullOrEmpty() -> HigRow(if (storeError != null) tr("Магазин недоступен") else tr("Пока пусто"))
                     else -> items.forEach { item -> StoreRow(item) }
                 }
             }
             if (webApps.isNotEmpty()) {
                 HigSection(
                     title = tr("Веб‑приложения"),
-                    footer = "Открываются в браузере PhoneXR прямо в VR. Добавленные появляются на главном экране VR."
+                    footer = tr("Открываются в браузере PhoneXR прямо в VR. Добавленные появляются на главном экране VR.")
                 ) {
                     webApps.forEach { app ->
                         val added = app.url in installedWeb
                         HigLink(app.name, value = if (added) tr("Открыть") else tr("Добавить")) {
                             if (added) {
-                                if (!WebApps.open(this@MainActivity, app.url)) error = "Установите браузер PhoneXR"
+                                if (!WebApps.open(this@MainActivity, app.url)) error = tr("Установите браузер PhoneXR")
                             } else {
                                 WebApps.add(this@MainActivity, app)
                                 installedWeb = installedWeb + app.url
@@ -734,7 +734,7 @@ class MainActivity : ComponentActivity() {
                 android.util.Log.e("PhoneXR-Store", "Store listing failed", failure)
                 runOnUiThread {
                     storeLoading = false
-                    storeError = failure.localizedMessage ?: "Магазин недоступен"
+                    storeError = failure.localizedMessage ?: tr("Магазин недоступен")
                 }
             }
         }.start()
