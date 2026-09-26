@@ -40,7 +40,7 @@ class SettingsContent(
     }
 
     private enum class Page(val title: String) {
-        ABOUT(tr("О гарнитуре")), CONNECTIVITY("Wi‑Fi и Bluetooth"), APPEARANCE("Интерфейс"),
+        ABOUT(tr("О гарнитуре")), CONNECTIVITY("Wi‑Fi и Bluetooth"), APPEARANCE(tr("Интерфейс")),
         UPDATE(tr("Обновление ПО")), FACE(tr("Лицо")), ROOM(tr("Сканирование комнаты")), BOUNDARY(tr("Граница"))
     }
 
@@ -106,18 +106,18 @@ class SettingsContent(
         text(tr("Обновление ПО"), 480f, 100f, 52f, Color.WHITE, bold = true)
         card(480f, 150f, 2)
         text(tr("Автообновление"), 510f, 200f, 34f, Color.WHITE)
-        text(if (Updates.autoUpdate(context)) "Вкл." else "Выкл.", 1560f, 200f, 34f, Color.rgb(170, 170, 178), right = true)
+        text(if (Updates.autoUpdate(context)) tr("Вкл.") else tr("Выкл."), 1560f, 200f, 34f, Color.rgb(170, 170, 178), right = true)
         buttons += RectF(480f, 150f, 1580f, 228f) to { Updates.setAutoUpdate(context, !Updates.autoUpdate(context)) }
         text(tr("Бета‑обновления"), 510f, 278f, 34f, Color.WHITE)
-        text(if (Updates.beta(context)) "Вкл." else "Выкл.", 1560f, 278f, 34f, Color.rgb(170, 170, 178), right = true)
+        text(if (Updates.beta(context)) tr("Вкл.") else tr("Выкл."), 1560f, 278f, 34f, Color.rgb(170, 170, 178), right = true)
         buttons += RectF(480f, 228f, 1580f, 306f) to { Updates.setBeta(context, !Updates.beta(context)); checkUpdate() }
         val found = release
         when {
-            checking -> text("Проверка обновлений…", 480f, 420f, 36f, Color.rgb(170, 170, 178))
+            checking -> text(tr("Проверка обновлений…"), 480f, 420f, 36f, Color.rgb(170, 170, 178))
             found == null -> {
                 text("PhoneXR ${Updates.currentVersion(context)}", 1030f, 440f, 44f, Color.WHITE, center = true, bold = true)
-                text(if (checked) "Установлена последняя версия ПО" else "", 1030f, 500f, 34f, Color.rgb(170, 170, 178), center = true)
-                button(RectF(830f, 560f, 1230f, 640f), "Проверить снова") { checkUpdate() }
+                text(if (checked) tr("Установлена последняя версия ПО") else "", 1030f, 500f, 34f, Color.rgb(170, 170, 178), center = true)
+                button(RectF(830f, 560f, 1230f, 640f), tr("Проверить снова")) { checkUpdate() }
             }
             else -> {
                 paint.color = Color.rgb(52, 52, 58)
@@ -146,7 +146,7 @@ class SettingsContent(
                         downloadProgress = null
                         val activity = context as? android.app.Activity
                         if (file != null && activity != null) activity.runOnUiThread { Updates.install(activity, file) }
-                        else status = "Обновление не скачалось"
+                        else status = tr("Обновление не скачалось")
                     }
                 }
             }
@@ -156,7 +156,7 @@ class SettingsContent(
     /** Called by the host after returning from the camera scanner. */
     fun personaChanged() {
         preview = null
-        status = if (Persona.exists(context)) "Персона готова" else "Сканирование отменено"
+        status = if (Persona.exists(context)) tr("Персона готова") else tr("Сканирование отменено")
         draw()
     }
 
@@ -191,24 +191,24 @@ class SettingsContent(
 
     private fun connectivity() {
         text("Wi‑Fi и Bluetooth", 480f, 100f, 52f, Color.WHITE, bold = true)
-        wrap("Системные сети открываются прямо в отдельном VR‑окне. Для управления Android‑окнами нужен Shizuku.", 480f, 170f, 1560f, 34f)
+        wrap(tr("Системные сети открываются прямо в отдельном VR‑окне. Для управления Android‑окнами нужен Shizuku."), 480f, 170f, 1560f, 34f)
         card(480f, 330f, 3)
         text("Wi‑Fi", 510f, 380f, 34f, Color.WHITE)
         text("Bluetooth", 510f, 458f, 34f, Color.WHITE)
         text("Shizuku", 510f, 536f, 34f, Color.WHITE)
         text(host.shizukuText(), 1560f, 536f, 30f, Color.rgb(170, 170, 178), right = true)
-        button(RectF(480f, 700f, 980f, 780f), "Открыть настройки Android") { host.openSystemSettings() }
-        button(RectF(1010f, 700f, 1480f, 780f), "Разрешить Shizuku") { host.requestShizuku() }
+        button(RectF(480f, 700f, 980f, 780f), tr("Открыть настройки Android")) { host.openSystemSettings() }
+        button(RectF(1010f, 700f, 1480f, 780f), tr("Разрешить Shizuku")) { host.requestShizuku() }
     }
 
     private fun appearance() {
-        text("Стиль главного меню", 480f, 100f, 52f, Color.WHITE, bold = true)
-        wrap("Большое меню показывает библиотеку перед вами. Компактная панель остаётся снизу и листается по страницам.", 480f, 170f, 1560f, 34f)
+        text(tr("Стиль главного меню"), 480f, 100f, 52f, Color.WHITE, bold = true)
+        wrap(tr("Большое меню показывает библиотеку перед вами. Компактная панель остаётся снизу и листается по страницам."), 480f, 170f, 1560f, 34f)
         val selected = Settings.homeStyle(context)
-        button(RectF(480f, 390f, 950f, 500f), if (selected == Settings.HomeStyle.LARGE) "✓ Большое" else "Большое") {
+        button(RectF(480f, 390f, 950f, 500f), if (selected == Settings.HomeStyle.LARGE) "✓ Большое" else tr("Большое")) {
             Settings.setHomeStyle(context, Settings.HomeStyle.LARGE); host.setHomeStyle(Settings.HomeStyle.LARGE)
         }
-        button(RectF(980f, 390f, 1560f, 500f), if (selected == Settings.HomeStyle.COMPACT) "✓ Компактная панель" else "Компактная панель") {
+        button(RectF(980f, 390f, 1560f, 500f), if (selected == Settings.HomeStyle.COMPACT) "✓ Компактная панель" else tr("Компактная панель")) {
             Settings.setHomeStyle(context, Settings.HomeStyle.COMPACT); host.setHomeStyle(Settings.HomeStyle.COMPACT)
         }
     }
@@ -221,20 +221,20 @@ class SettingsContent(
         val version = runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull()
         val runtime = when (PhoneXrRuntime.state(context)) {
             PhoneXrRuntime.State.READY -> "PhoneXR Runtime"
-            PhoneXrRuntime.State.OUTDATED -> "PhoneXR Runtime (есть обновление)"
-            PhoneXrRuntime.State.MISSING -> "не установлен"
+            PhoneXrRuntime.State.OUTDATED -> tr("PhoneXR Runtime (есть обновление)")
+            PhoneXrRuntime.State.MISSING -> tr("не установлен")
         }
         val rows = listOf(
-            "Устройство" to "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}",
+            tr("Устройство") to "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}",
             "Android" to Build.VERSION.RELEASE,
             "PhoneXR" to (version ?: "—"),
-            "Отслеживание" to host.trackingText(),
-            "Экран" to "${metrics.widthPixels}×${metrics.heightPixels}, по ${metrics.widthPixels / 2}×${metrics.heightPixels} на глаз",
-            "Поле зрения" to "90° по вертикали",
-            "Межзрачковое" to "${Settings.ipdMm(context)} мм",
-            "Руки" to "камера, 21 точка на руку",
+            tr("Отслеживание") to host.trackingText(),
+            tr("Экран") to "${metrics.widthPixels}×${metrics.heightPixels}, ${metrics.widthPixels / 2}×${metrics.heightPixels} ${tr("на глаз")}",
+            tr("Поле зрения") to tr("90° по вертикали"),
+            tr("Межзрачковое") to "${Settings.ipdMm(context)} ${tr("мм")}",
+            tr("Руки") to tr("камера, 21 точка на руку"),
             "OpenXR" to runtime,
-            "Батарея" to (battery?.let { "$it %" } ?: "—"),
+            tr("Батарея") to (battery?.let { "$it %" } ?: "—"),
         )
         card(480f, 150f, rows.size)
         rows.forEachIndexed { i, (name, value) ->
@@ -247,7 +247,7 @@ class SettingsContent(
     private fun face() {
         text(tr("Лицо"), 480f, 100f, 52f, Color.WHITE, bold = true)
         if (BuildConfig.LITE) {
-            wrap("Persona отключена в Lite. В звонках показывается только имя собеседника.", 480f, 190f, 1560f, 34f)
+            wrap(tr("Persona отключена в Lite. В звонках показывается только имя собеседника."), 480f, 190f, 1560f, 34f)
             return
         }
         val exists = Persona.exists(context)
@@ -259,9 +259,9 @@ class SettingsContent(
             canvas.drawBitmap(image, null, rect, paint)
             canvas.restore()
         }
-        val info = if (exists) "Ваше лицо для VR: моргает само, а рот двигается, когда вы говорите. " +
-            "Нейросеть отличает речь от случайных звуков, микрофон очищается от шума."
-        else "Запустите сканирование: камера сама запишет лицо спереди и с боков. Выбирать фото из галереи не нужно."
+        val info = if (exists) tr("Ваше лицо для VR: моргает само, а рот двигается, когда вы говорите. ") +
+            tr("Нейросеть отличает речь от случайных звуков, микрофон очищается от шума.")
+        else tr("Запустите сканирование: камера сама запишет лицо спереди и с боков. Выбирать фото из галереи не нужно.")
         wrap(info, if (exists) 940f else 480f, 190f, if (exists) 1560f else 1560f, 34f)
         status?.let { wrap(it, 480f, 640f, 1560f, 32f, Color.rgb(255, 180, 90)) }
         if (busy) return
@@ -269,7 +269,7 @@ class SettingsContent(
             button(RectF(480f, 740f, 830f, 820f), tr("Показать лицо")) { host.showPersona() }
             button(RectF(860f, 740f, 1210f, 820f), tr("Сканировать заново")) { host.scanPersona() }
             button(RectF(1240f, 740f, 1560f, 820f), tr("Удалить"), Color.rgb(255, 69, 58)) {
-                Persona.delete(context); preview = null; status = "Лицо удалено"
+                Persona.delete(context); preview = null; status = tr("Лицо удалено")
             }
         } else {
             button(RectF(480f, 740f, 980f, 820f), tr("Сканировать камерой")) { host.scanPersona() }
@@ -280,14 +280,14 @@ class SettingsContent(
         text(tr("Граница"), 480f, 100f, 52f, Color.WHITE, bold = true)
         if (host.trackingText().startsWith("3DoF")) {
             wrap(
-                "Сейчас включён 3DoF: поворот головы работает, но положение в комнате, стены, столы и столкновения недоступны. Включите 6DoF в настройках PhoneXR.",
+                tr("Сейчас включён 3DoF: поворот головы работает, но положение в комнате, стены, столы и столкновения недоступны. Включите 6DoF в настройках PhoneXR."),
                 480f, 180f, 1560f, 36f, Color.rgb(255, 159, 10)
             )
             return
         }
         wrap(
-            "Обойдите свободное место по краю — PhoneXR запомнит границу. Если подойдёте к ней, " +
-                "появится стена, а если выйдете — предупреждение. Начинайте с того же места, где запускаете VR.",
+            tr("Обойдите свободное место по краю — PhoneXR запомнит границу. Если подойдёте к ней, ") +
+                tr("появится стена, а если выйдете — предупреждение. Начинайте с того же места, где запускаете VR."),
             480f, 170f, 1560f, 34f
         )
         text(host.boundaryText(), 480f, 470f, 36f, Color.rgb(170, 170, 178))
@@ -298,11 +298,11 @@ class SettingsContent(
     private fun room() {
         text(tr("Сканирование комнаты"), 480f, 100f, 52f, Color.WHITE, bold = true)
         if (host.trackingText().startsWith("3DoF")) {
-            wrap("Сканирование пола, стен и столов работает только в 6DoF. Включите 6DoF в настройках PhoneXR и установите Google Play Services for AR.",
+            wrap(tr("Сканирование пола, стен и столов работает только в 6DoF. Включите 6DoF в настройках PhoneXR и установите Google Play Services for AR."),
                 480f, 180f, 1560f, 36f, Color.rgb(255, 159, 10))
             return
         }
-        wrap("Медленно осмотрите пол, стены и поверхности со всех сторон. PhoneXR показывает найденные горизонтальные и вертикальные плоскости; граница комнаты уже ограничивает движение 3D‑предметов.",
+        wrap(tr("Медленно осмотрите пол, стены и поверхности со всех сторон. PhoneXR показывает найденные горизонтальные и вертикальные плоскости; граница комнаты уже ограничивает движение 3D‑предметов."),
             480f, 170f, 1560f, 34f)
         text(host.roomText(), 480f, 480f, 36f, Color.rgb(170, 170, 178))
         button(RectF(480f, 740f, 990f, 820f), tr("Начать новое сканирование")) { host.startRoomScan() }

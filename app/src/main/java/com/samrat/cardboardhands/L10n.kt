@@ -1,6 +1,7 @@
 package com.samrat.cardboardhands
 
 import android.content.Context
+import java.util.Locale
 
 /**
  * PhoneXR's languages. The interface is written in Russian; [tr] gives the chosen language's text
@@ -15,12 +16,18 @@ object L10n {
     }
 
     private const val PREFS = "language"
-    @Volatile var current = Lang.RU
+    @Volatile var current = Lang.EN
         private set
 
     fun init(context: Context) {
-        current = runCatching { Lang.valueOf(context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("lang", Lang.RU.name)!!) }
-            .getOrDefault(Lang.RU)
+        val locale = Locale.getDefault()
+        val systemLanguage = when (locale.language) {
+            "ru" -> Lang.RU
+            "pt" -> if (locale.country.equals("BR", ignoreCase = true)) Lang.PT_BR else Lang.PT_PT
+            else -> Lang.EN
+        }
+        current = runCatching { Lang.valueOf(context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("lang", systemLanguage.name)!!) }
+            .getOrDefault(systemLanguage)
     }
 
     fun set(context: Context, lang: Lang) {
@@ -30,11 +37,41 @@ object L10n {
 
     fun tr(ru: String): String {
         val index = when (current) { Lang.RU -> return ru; Lang.EN -> 0; Lang.PT_BR -> 1; Lang.PT_PT -> 2 }
-        return DICT[ru]?.get(index) ?: ru
+        return DICT[ru]?.get(index) ?: if (current == Lang.EN) EN_EXTRA[ru] ?: ru else ru
     }
 
     /** Russian → English, Portuguese (Brazil), Portuguese (Portugal). */
     private val DICT: Map<String, Array<String>> = mapOf(
+        "Назад" to arrayOf("Back", "Voltar", "Voltar"),
+        "Библиотека" to arrayOf("Library", "Biblioteca", "Biblioteca"),
+        "Видео" to arrayOf("Videos", "Vídeos", "Vídeos"),
+        "Компьютер" to arrayOf("Computer", "Computador", "Computador"),
+        "Скриншот" to arrayOf("Screenshot", "Captura de tela", "Captura de ecrã"),
+        "Показать меню" to arrayOf("Show menu", "Mostrar menu", "Mostrar menu"),
+        "Убрать меню" to arrayOf("Hide menu", "Ocultar menu", "Ocultar menu"),
+        "Сканирование комнаты" to arrayOf("Room scanning", "Escaneamento da sala", "Digitalização da divisão"),
+        "Начать новое сканирование" to arrayOf("Start a new scan", "Iniciar nova varredura", "Iniciar nova digitalização"),
+        "Ваш юзернейм" to arrayOf("Your username", "Seu nome de usuário", "O seu nome de utilizador"),
+        "Звонок" to arrayOf("Call", "Chamada", "Chamada"),
+        "Оформление" to arrayOf("Appearance", "Aparência", "Aspeto"),
+        "Войдите в аккаунт" to arrayOf("Sign in to your account", "Entre na sua conta", "Inicie sessão na sua conta"),
+        "Этот юзернейм уже занят" to arrayOf("This username is taken", "Este nome de usuário já está em uso", "Este nome de utilizador já está em uso"),
+        "Юзернейм: 3–20 символов, a–z, 0–9, _ и ." to arrayOf("Username: 3–20 characters, a–z, 0–9, _ and .", "Nome de usuário: 3–20 caracteres, a–z, 0–9, _ e .", "Nome de utilizador: 3–20 caracteres, a–z, 0–9, _ e ."),
+        "3–20 символов: a–z, 0–9, _ и . По нему вас найдут друзья." to arrayOf("3–20 characters: a–z, 0–9, _ and . Friends can find you by it.", "3–20 caracteres: a–z, 0–9, _ e . Amigos podem encontrar você por ele.", "3–20 caracteres: a–z, 0–9, _ e . Os amigos podem encontrá-lo por ele."),
+        "Добавляйте друзей по юзернейму и звоните им персоной в VR" to arrayOf("Add friends by username and call them with your Persona in VR", "Adicione amigos pelo nome de usuário e ligue com sua Persona em VR", "Adicione amigos pelo nome de utilizador e ligue com a sua Persona em VR"),
+        "Друзья и звонки работают с аккаунтом PhoneXR." to arrayOf("Friends and calls require a PhoneXR account.", "Amigos e chamadas precisam de uma conta PhoneXR.", "Amigos e chamadas requerem uma conta PhoneXR."),
+        "Позвонить можно из приложения «Звонки» в шлеме, когда друг в сети." to arrayOf("Call from the Calls app in VR when your friend is online.", "Ligue pelo app Chamadas em VR quando seu amigo estiver online.", "Ligue pela aplicação Chamadas em VR quando o seu amigo estiver online."),
+        "Камера нужна для сканирования QR" to arrayOf("Camera access is needed to scan QR codes", "É preciso usar a câmera para escanear códigos QR", "É necessário acesso à câmara para ler códigos QR"),
+        "Наведите камеру на QR‑код профиля Cardboard" to arrayOf("Point the camera at your Cardboard profile QR code", "Aponte a câmera para o código QR do perfil Cardboard", "Aponte a câmara para o código QR do perfil Cardboard"),
+        "QR найден, но это не профиль Cardboard" to arrayOf("QR code found, but it is not a Cardboard profile", "Código QR encontrado, mas não é um perfil Cardboard", "Código QR encontrado, mas não é um perfil Cardboard"),
+        "Не удалось прочитать файл" to arrayOf("Could not read the file", "Não foi possível ler o arquivo", "Não foi possível ler o ficheiro"),
+        "Minecraft не открыл мод" to arrayOf("Minecraft did not open the mod", "O Minecraft não abriu o mod", "O Minecraft não abriu o mod"),
+        "Сначала установите Minecraft" to arrayOf("Install Minecraft first", "Instale o Minecraft primeiro", "Instale o Minecraft primeiro"),
+        "Это не мод Minecraft: нужен .mcaddon, .mcpack, .mcworld или .mctemplate" to arrayOf("This is not a Minecraft mod: use .mcaddon, .mcpack, .mcworld or .mctemplate", "Isto não é um mod do Minecraft: use .mcaddon, .mcpack, .mcworld ou .mctemplate", "Isto não é um mod do Minecraft: use .mcaddon, .mcpack, .mcworld ou .mctemplate"),
+        "Мод открыт в Minecraft: подтвердите импорт" to arrayOf("Mod opened in Minecraft: confirm the import", "Mod aberto no Minecraft: confirme a importação", "Mod aberto no Minecraft: confirme a importação"),
+        "Распознавание речи недоступно — используйте клавиатуру" to arrayOf("Speech recognition is unavailable — use the keyboard", "Reconhecimento de fala indisponível — use o teclado", "Reconhecimento de voz indisponível — use o teclado"),
+        "Войдите в аккаунт PhoneXR, чтобы говорить с Elix" to arrayOf("Sign in to PhoneXR to talk to Elix", "Entre na conta PhoneXR para falar com Elix", "Inicie sessão no PhoneXR para falar com Elix"),
+        "Elix ещё не включён на сервере (supabase functions deploy elix)" to arrayOf("Elix is not enabled on the server yet (supabase functions deploy elix)", "Elix ainda não está ativo no servidor (supabase functions deploy elix)", "Elix ainda não está ativo no servidor (supabase functions deploy elix)"),
         // Tabs and main screens
         "Меню" to arrayOf("Menu", "Menu", "Menu"),
         "Магазин" to arrayOf("Store", "Loja", "Loja"),
@@ -173,6 +210,140 @@ object L10n {
         "Обойдите край свободного места." to arrayOf("Walk around the edge of the free space.", "Caminhe pela borda do espaço livre.", "Percorra o limite do espaço livre."),
         "Выхожу из VR." to arrayOf("Leaving VR.", "Saindo do VR.", "A sair de VR."),
         "Открываю." to arrayOf("Opening.", "Abrindo.", "A abrir."),
+    )
+
+    /** English coverage for labels that were previously hardcoded in individual screens. */
+    private val EN_EXTRA: Map<String, String> = mapOf(
+        "Нажмите на игру, чтобы включить трекинг и запустить её. " to "Tap a game to start tracking and launch it. ",
+        "Игры Gear VR и сборки для гарнитур сначала нужно пропатчить: PhoneXR откроет им рантайм " to "Gear VR games and headset builds need patching first: PhoneXR assigns its runtime, ",
+        "PhoneXR, впишет новый трекинг и оптимизирует их под телефон." to "adds new tracking, and optimizes them for the phone.",
+        "APK OpenXR-игры, игры Gear VR (64 и 32 бита) или пакет .pxr. " to "An OpenXR game APK, a Gear VR game (64 or 32 bit), or a .pxr package. ",
+        "PhoneXR впишет новый трекинг, оптимизирует сборку под телефон, подпишет её и откроет установку." to "PhoneXR adds tracking, optimizes the build for your phone, signs it, and opens the installer.",
+        "Игры Daydream ищут Google VR Services. PhoneXR ставит Opendream Services 1.13 — " to "Daydream games require Google VR Services. PhoneXR installs Opendream Services 1.13 — ",
+        "после этого игры Daydream и Cardboard появляются в списке игр и в VR‑доме." to "then Daydream and Cardboard games appear in the game list and VR home.",
+        "PhoneXR Runtime заменяет Monado: OpenXR‑игры получают руки, Joy‑Con и голову от PhoneXR. " to "PhoneXR Runtime replaces Monado: OpenXR games receive hands, Joy‑Con, and head tracking from PhoneXR. ",
+        "После установки выберите «PhoneXR Runtime» в OpenXR Runtime Broker." to "After installation, select “PhoneXR Runtime” in OpenXR Runtime Broker.",
+        "Minecraft сам импортирует мод, потом включите его в настройках мира." to "Minecraft imports the mod; then enable it in world settings.",
+        "Ваше лицо для VR: моргает само, а рот двигается, когда вы говорите. " to "Your VR face blinks and moves its mouth when you speak. ",
+        "Нейросеть отличает речь от случайных звуков, микрофон очищается от шума." to "The model distinguishes speech from background sounds and cleans microphone noise.",
+        "Сейчас включён 3DoF: поворот головы работает, но положение в комнате, стены, столы и столкновения недоступны. Включите 6DoF в настройках PhoneXR." to "3DoF is active: head rotation works, but room position, surfaces, and collisions are unavailable. Enable 6DoF in PhoneXR settings.",
+        "Обойдите свободное место по краю — PhoneXR запомнит границу. Если подойдёте к ней, " to "Walk around the edge of your free space to set the boundary. If you approach it, ",
+        "появится стена, а если выйдете — предупреждение. Начинайте с того же места, где запускаете VR." to "a wall appears; leaving it shows a warning. Start where you normally enter VR.",
+        "PhoneXR Runtime (есть обновление)" to "PhoneXR Runtime (update available)",
+        "Отслеживание" to "Tracking",
+        "3DoF работает на любом телефоне. 6DoF добавляет перемещение в комнате через ARCore." to "3DoF works on any phone. 6DoF adds room movement through ARCore.",
+        "Поворот головы без перемещения" to "Head rotation without movement",
+        "Только в PhoneXR Full" to "Only in PhoneXR Full",
+        "Поворот и перемещение через ARCore" to "Rotation and movement through ARCore",
+        "Руки" to "Hands",
+        "Жесты нажимают" to "Gestures press buttons",
+        "Щипок и кулак работают как кнопки контроллера" to "Pinch and fist act as controller buttons",
+        "Только руки" to "Hands only",
+        "Игра получает руки без нажатий" to "The game receives hands without button presses",
+        "Перехват кнопок" to "Button interception",
+        "Включить перехват" to "Enable interception",
+        "Гироскоп Joy‑Con" to "Joy‑Con gyro",
+        "Проверить гироскоп" to "Test gyro",
+        "Joy‑Con через камеру" to "Camera Joy‑Con tracking",
+        "Поворот и положение Joy‑Con" to "Joy‑Con rotation and position",
+        "Если гироскоп Joy‑Con недоступен, камера может сама находить Joy‑Con по цвету." to "If the Joy‑Con gyro is unavailable, the camera can find the Joy‑Con by color.",
+        "Метки на Joy‑Con" to "Joy‑Con markers",
+        "Отслеживать по меткам" to "Track using markers",
+        "Контроллеры" to "Controllers",
+        "Ничего не подключено" to "Nothing connected",
+        "Подключите геймпад по Bluetooth" to "Connect a gamepad via Bluetooth",
+        "Сейчас" to "Now",
+        "Левый стик" to "Left stick",
+        "Правый стик" to "Right stick",
+        "Левая рука" to "Left hand",
+        "Правая рука" to "Right hand",
+        "Стик читается только на Android 14 и новее." to "Stick input requires Android 14 or newer.",
+        "Назначить нажатием кнопки" to "Assign by pressing a button",
+        "Сбросить раскладку" to "Reset button layout",
+        "Нужен Android 12 или новее" to "Android 12 or newer is required",
+        "Joy‑Con не найдены — подключите их по Bluetooth" to "No Joy‑Con found — connect via Bluetooth",
+        "Недоступны — поворот руки берётся только с камеры" to "Unavailable — hand rotation uses camera only",
+        "ничего не нажато" to "nothing pressed",
+        "Нажмите кнопку на Joy‑Con" to "Press a Joy‑Con button",
+        "PhoneXR ждёт нажатия. Дальше выберите, что эта кнопка делает в VR." to "PhoneXR is waiting for a button press. Then choose what it does in VR.",
+        "Что она делает в VR:" to "What it does in VR:",
+        "Нажмите кнопку на Joy‑Con — она подсветится на схеме. " to "Press a Joy‑Con button to highlight it in the diagram. ",
+        "Нажмите на кнопку на схеме, чтобы назначить ей действие." to "Tap a button in the diagram to assign an action.",
+        "Без перехвата кнопки Joy‑Con уходят игре как геймпад, а не как контроллеры VR. " to "Without interception, Joy‑Con buttons reach the game as a gamepad, not VR controllers. ",
+        "Включите «PhoneXR Joy‑Con» в «Специальных возможностях»." to "Enable “PhoneXR Joy‑Con” in Android Accessibility settings.",
+        "Самый точный режим: камера видит напечатанные метки ArUco и даёт положение и полный поворот. " to "The most accurate mode: the camera sees printed ArUco markers to track position and full rotation. ",
+        "Распечатайте markers/joycon_markers_A4.pdf в масштабе 100%. ID 0–3 — левый Joy‑Con, 4–7 — правый: " to "Print markers/joycon_markers_A4.pdf at 100% scale. IDs 0–3 are for the left Joy‑Con; 4–7 are for the right: ",
+        "слева, середина (сторона с кнопками), справа, сверху. Ровно держите Joy‑Con кнопками к себе, " to "left, center (button side), right, and top. Hold the Joy‑Con level with its buttons facing you, ",
+        "верхом вверх — это «вперёд». После включения остановите и снова запустите трекинг." to "top upward means “forward.” Restart tracking after enabling this.",
+        "PhoneXR принимает любые геймпады: Joy‑Con, DualShock, Xbox и безымянные. " to "PhoneXR supports gamepads including Joy‑Con, DualShock, Xbox, and generic controllers. ",
+        "Один геймпад работает за две руки: левый стик и кнопки X/Y/L — левая рука, правый стик и A/B/R — правая." to "One gamepad controls both hands: left stick and X/Y/L for the left hand; right stick and A/B/R for the right.",
+        "Пропустить" to "Skip",
+        "Как вас зовут?" to "What is your name?",
+        "Имя пользователя" to "Username",
+        "Готово" to "Done",
+        "Настройка комнаты" to "Room setup",
+        "Добро пожаловать" to "Welcome",
+        "Обойдите свободное место по краю — PhoneXR запомнит границу. Круг замкнётся сам, щипок — готово." to "Walk around the edge of your free space to set the boundary. The loop closes automatically; pinch to finish.",
+        "Сведите большой и указательный пальцы и разведите их. Три раза." to "Bring your thumb and index finger together and apart three times.",
+        "Для рук нужен доступ к камере" to "Hand tracking needs camera access",
+        "Профиль Cardboard не содержит корректное межзрачковое расстояние" to "The Cardboard profile has an invalid interpupillary distance",
+        "Не удалось сохранить .pxr" to "Could not save the .pxr file",
+        "Сборка .pxr…" to "Building .pxr…",
+        "Не удалось собрать .pxr" to "Could not build .pxr",
+        "VR на телефоне: руки в камере, Joy‑Con вместо контроллеров" to "Phone VR with camera hand tracking and Joy‑Con controllers",
+        "Сейчас работает 3DoF" to "3DoF is active",
+        "Включить 6DoF" to "Enable 6DoF",
+        "6DoF доступен в PhoneXR Full" to "6DoF is available in PhoneXR Full",
+        "Поворот головы и контроллеры работают, но перемещение по комнате, граница, стены, столы и физика комнаты требуют 6DoF." to "Head rotation and controllers work. Room movement, boundary, surfaces, and room physics require 6DoF.",
+        "VR‑дом в смешанной реальности: щипок — открыть, кулак — перетащить иконки, ладонь к лицу + щипок — меню. Joy‑Con: ZR или A." to "Mixed reality home: pinch to open, make a fist to move icons, hold a palm near your face and pinch for the menu. Joy‑Con: ZR or A.",
+        "Поиск игр…" to "Looking for games…",
+        "VR-игры не найдены" to "No VR games found",
+        "Установите игру из магазина или из файла" to "Install a game from the store or a file",
+        "Собрать .pxr из APK" to "Build .pxr from APK",
+        "Трекинг остановлен" to "Tracking stopped",
+        "Установить PhoneXR Runtime" to "Install PhoneXR Runtime",
+        "Обновить PhoneXR Runtime" to "Update PhoneXR Runtime",
+        "Не входит в эту сборку" to "Not included in this build",
+        "Магазин недоступен" to "Store unavailable",
+        "Opendream установлен" to "Opendream installed",
+        "Установить Opendream Services" to "Install Opendream Services",
+        "Установите браузер PhoneXR" to "Install the PhoneXR browser",
+        "OpenXR, Quest и Pico: PhoneXR сам скачает и подготовит APK." to "OpenXR, Quest and Pico: PhoneXR downloads and prepares the APK.",
+        "Обычные Minecraft и Roblox на большом экране в VR: своя комната, поворот головы, " to "Play regular Minecraft and Roblox on a large VR screen, with your own room, head rotation, ",
+        "игра двумя руками или Joy‑Con. Нажмите на режим — появится инструкция." to "two-handed or Joy‑Con controls. Tap a mode for instructions.",
+        "Android‑приложения: любые приложения телефона окнами в VR (нужен Shizuku). Появляется на главном экране VR." to "Android apps run in VR windows (requires Shizuku). They appear on the VR home screen.",
+        "Открываются в браузере PhoneXR прямо в VR. Добавленные появляются на главном экране VR." to "Open directly in the PhoneXR VR browser. Added apps appear on the VR home screen.",
+        "Интерфейс" to "Appearance",
+        "Проверка обновлений…" to "Checking for updates…",
+        "Установлена последняя версия ПО" to "Software is up to date",
+        "Проверить снова" to "Check again",
+        "Обновление не скачалось" to "Update could not be downloaded",
+        "Персона готова" to "Persona is ready",
+        "Сканирование отменено" to "Scan canceled",
+        "Лицо удалено" to "Persona deleted",
+        "Системные сети открываются прямо в отдельном VR‑окне. Для управления Android‑окнами нужен Shizuku." to "System connectivity settings open in a separate VR window. Managing Android windows requires Shizuku.",
+        "Открыть настройки Android" to "Open Android settings",
+        "Разрешить Shizuku" to "Allow Shizuku",
+        "Стиль главного меню" to "Home menu style",
+        "Большое меню показывает библиотеку перед вами. Компактная панель остаётся снизу и листается по страницам." to "The large menu shows your library in front of you. The compact panel stays below and has multiple pages.",
+        "Большое" to "Large",
+        "Компактная панель" to "Compact panel",
+        "Устройство" to "Device",
+        "Экран" to "Display",
+        "Поле зрения" to "Field of view",
+        "Межзрачковое" to "IPD",
+        "Батарея" to "Battery",
+        "90° по вертикали" to "90° vertical",
+        "камера, 21 точка на руку" to "camera, 21 points per hand",
+        "Persona отключена в Lite. В звонках показывается только имя собеседника." to "Persona is disabled in Lite. Calls show only the caller’s name.",
+        "Запустите сканирование: камера сама запишет лицо спереди и с боков. Выбирать фото из галереи не нужно." to "Start a scan: the camera captures your face from the front and sides. No gallery photo is needed.",
+        "Сканирование пола, стен и столов работает только в 6DoF. Включите 6DoF в настройках PhoneXR и установите Google Play Services for AR." to "Scanning floors, walls, and tables requires 6DoF. Enable it in PhoneXR settings and install Google Play Services for AR.",
+        "Медленно осмотрите пол, стены и поверхности со всех сторон. PhoneXR показывает найденные горизонтальные и вертикальные плоскости; граница комнаты уже ограничивает движение 3D‑предметов." to "Slowly scan the floor, walls, and surfaces from all sides. PhoneXR shows detected horizontal and vertical planes; the room boundary limits 3D object movement.",
+        "Вкл." to "On", "Выкл." to "Off", "Включено" to "Enabled", "Выключен" to "Disabled",
+        "Включён" to "Enabled", "Текущие данные" to "Live input",
+        "Гироскоп доступен у" to "Gyro available on", "поворот руки работает без камеры" to "hand rotation works without the camera",
+        "вперёд" to "forward", "вбок" to "sideways", "Кнопка" to "Button", "на глаз" to "per eye", "мм" to "mm",
+        "Установлен" to "Installed", "Подключён" to "Connected", "не установлен" to "not installed",
     )
 }
 

@@ -142,7 +142,7 @@ class Onboarding(private val context: Context, private val host: Host) {
                 body(tr("Держите обе руки перед собой, пальцы раскрыты. Не двигайтесь пару секунд."))
                 val progress = if (bothHandsSince == 0L) 0f else ((SystemClock.elapsedRealtime() - bothHandsSince) / SCAN_MS.toFloat()).coerceIn(0f, 1f)
                 bar(progress)
-                button(RectF(WIDTH / 2f - 220f, 760f, WIDTH / 2f + 220f, 860f), "Пропустить", Color.argb(90, 255, 255, 255)) { go(Step.NAME) }
+                button(RectF(WIDTH / 2f - 220f, 760f, WIDTH / 2f + 220f, 860f), tr("Пропустить"), Color.argb(90, 255, 255, 255)) { go(Step.NAME) }
             }
             Step.FACE_SCAN -> {
                 card()
@@ -160,26 +160,26 @@ class Onboarding(private val context: Context, private val host: Host) {
             }
             Step.NAME -> {
                 card()
-                title("Как вас зовут?")
+                title(tr("Как вас зовут?"))
                 paint.color = Color.argb(70, 255, 255, 255)
                 canvas.drawRoundRect(RectF(300f, 220f, WIDTH - 300f, 330f), 55f, 55f, paint)
-                text(if (name.isEmpty()) "Имя пользователя" else name + if ((t * 2).toInt() % 2 == 0) "|" else "",
+                text(if (name.isEmpty()) tr("Имя пользователя") else name + if ((t * 2).toInt() % 2 == 0) "|" else "",
                     WIDTH / 2f, 295f, 60f, if (name.isEmpty()) Color.argb(140, 255, 255, 255) else Color.WHITE)
-                button(RectF(WIDTH / 2f - 200f, 360f, WIDTH / 2f + 200f, 440f), "Готово") { confirmName() }
+                button(RectF(WIDTH / 2f - 200f, 360f, WIDTH / 2f + 200f, 440f), tr("Готово")) { confirmName() }
                 keyboard.draw(hover)
                 canvas.drawBitmap(keyboard.bitmap, null, keyboardRect, paint)
             }
             Step.ROOM -> {
                 card()
-                title("Настройка комнаты")
-                body("Обойдите свободное место по краю — PhoneXR запомнит границу. Круг замкнётся сам, щипок — готово.")
-                button(RectF(WIDTH / 2f - 220f, 760f, WIDTH / 2f + 220f, 860f), "Пропустить", Color.argb(90, 255, 255, 255)) { go(Step.PINCH) }
+                title(tr("Настройка комнаты"))
+                body(tr("Обойдите свободное место по краю — PhoneXR запомнит границу. Круг замкнётся сам, щипок — готово."))
+                button(RectF(WIDTH / 2f - 220f, 760f, WIDTH / 2f + 220f, 860f), tr("Пропустить"), Color.argb(90, 255, 255, 255)) { go(Step.PINCH) }
                 if (host.boundaryReady() && t > 1f) go(Step.PINCH)
             }
             Step.PINCH -> {
                 card()
                 title("Калибровка рук")
-                body("Сведите большой и указательный пальцы и разведите их. Три раза.")
+                body(tr("Сведите большой и указательный пальцы и разведите их. Три раза."))
                 for (i in 0 until 3) {
                     paint.color = if (i < pinches) Color.rgb(48, 209, 88) else Color.argb(80, 255, 255, 255)
                     canvas.drawCircle(WIDTH / 2f + (i - 1) * 90f, 600f, 30f, paint)
@@ -187,7 +187,7 @@ class Onboarding(private val context: Context, private val host: Host) {
             }
             Step.WELCOME -> {
                 val hi = Settings.userName(context).takeIf { it.isNotBlank() }
-                written("Добро пожаловать", t, 150f, HEIGHT / 2f + 20f)
+                written(tr("Добро пожаловать"), t, 150f, HEIGHT / 2f + 20f)
                 if (hi != null && t > 1f) text(hi, WIDTH / 2f, HEIGHT / 2f + 150f, 64f, Color.argb(((t - 1f).coerceIn(0f, 1f) * 255).toInt(), 255, 255, 255))
                 if (t > 3f) {
                     Settings.setSetupDone(context)

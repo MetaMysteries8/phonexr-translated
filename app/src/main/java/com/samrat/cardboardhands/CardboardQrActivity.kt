@@ -38,6 +38,7 @@ class CardboardQrActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        L10n.init(this)
         preview = PreviewView(this).apply { scaleType = PreviewView.ScaleType.FILL_CENTER }
         status = TextView(this).apply {
             text = tr("Наведите камеру на QR‑код профиля Cardboard")
