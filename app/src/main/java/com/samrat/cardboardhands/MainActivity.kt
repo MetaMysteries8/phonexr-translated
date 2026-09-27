@@ -1187,8 +1187,8 @@ class MainActivity : ComponentActivity() {
         private const val MINECRAFT = "com.mojang.minecraftpe"
         private val VR_MODES = listOf(
             VrMode("Minecraft VR", "Minecraft", MINECRAFT, "Bedrock в гостиной с камином", "гостиная из Minecraft VR", CinemaActivity.SCENE_ROOM),
-            VrMode("Roblox VR", "Roblox", "com.roblox.client", "Roblox в доме из Brookhaven", "дом из Roblox с камином", CinemaActivity.SCENE_ROBLOX),
-            VrMode("Brawl Stars VR", "Brawl Stars", "com.supercell.brawlstars", "Brawl Stars посреди арены", "360° панорама арены", CinemaActivity.SCENE_BRAWL),
+            VrMode("Roblox VR", "Roblox", "com.roblox.client", "Roblox на экране в VR", "небо вокруг экрана", CinemaActivity.SCENE_ROBLOX),
+            VrMode("Brawl Stars VR", "Brawl Stars", "com.supercell.brawlstars", "Brawl Stars на экране в VR", "небо вокруг экрана", CinemaActivity.SCENE_BRAWL),
         )
         /** Height of the floating tab bar plus its margin. */
         private val TAB_BAR_ROOM = 120.dp

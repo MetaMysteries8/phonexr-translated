@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.content.Intent
 import android.content.ServiceConnection
 import android.hardware.SensorManager
@@ -75,9 +74,7 @@ class CinemaActivity : Activity(), LifecycleOwner {
         val sceneName = intent.getStringExtra(EXTRA_SCENE) ?: SCENE_ROOM
         val place: CinemaScene? = runCatching {
             when (sceneName) {
-                SCENE_ROBLOX -> GlbScene.load(this, "cinema/roblox_house.glb", GlbScene.ROBLOX_HOUSE)
-                SCENE_BRAWL -> PanoramaScene(assets.open("cinema/brawl.jpg").use { BitmapFactory.decodeStream(it) })
-                SCENE_SKY -> null
+                SCENE_ROBLOX, SCENE_BRAWL, SCENE_SKY -> null
                 else -> LivingRoomScene(GlbRoom.load(this, "cinema/living_room.glb"))
             }
         }.onFailure { Log.w(TAG, "Scene $sceneName failed to load", it) }.getOrNull()
