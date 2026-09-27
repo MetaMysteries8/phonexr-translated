@@ -11,10 +11,9 @@ import java.net.URL
 
 /** Public catalog owned by the PhoneXR fork. Game and mod JSON files point to HTTPS downloads. */
 object GameStore {
-    // Account, friends, and Elix still use the existing backend. It is not a catalog source.
-    const val URL_BASE = "https://fjiostsfwfennbovpolc.supabase.co"
     const val REPOSITORY = "MetaMysteries8/phonexr-game-store-latitude-fork"
     const val STORE_URL = "https://github.com/$REPOSITORY"
+    const val GORILLA_TAG_ARCHIVE = "https://github.com/MetaMysteries8/gtag"
     const val EMPTY_HINT = "Игр пока нет. Добавьте JSON‑файл игры в ваш репозиторий магазина."
 
     data class Item(

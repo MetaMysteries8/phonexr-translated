@@ -17,6 +17,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+from check_elf_pages import check
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SDK = os.environ.get("ANDROID_HOME") or os.path.expanduser("~/Library/Android/sdk")
@@ -95,6 +96,7 @@ def main():
     parser.add_argument("--apk", default=os.path.join(ROOT, "VR-Android", "2-Monado-OpenXR-Runtime.apk"))
     parser.add_argument("-o", "--output", default=os.path.join(ROOT, "app", "src", "main", "assets", "runtime", "phonexr-runtime.apk"))
     arguments = parser.parse_args()
+    check(arguments.apk)
     with tempfile.TemporaryDirectory() as work:
         decoded = os.path.join(work, "decoded")
         subprocess.run(["apktool", "d", "-q", "-s", "-f", arguments.apk, "-o", decoded], check=True)

@@ -226,11 +226,7 @@ class VrHomeActivity : Activity(), LifecycleOwner {
         JoyConBridge.watch(this, watching = true, learning = false)
         CinemaActivity.setJoyConPassthrough(this, false)
         loadApps()
-        Calls.localHands = { handPoints }
-        Calls.localHandImage = if (BuildConfig.LITE) ({ null }) else ({ handFrameForCall() })
-        Calls.unlisten(callListener)
-        Calls.listen(callListener)
-        thread(name = "PhoneXR calls start") { Calls.start(this) }
+
     }
 
     override fun onPause() {
@@ -246,9 +242,6 @@ class VrHomeActivity : Activity(), LifecycleOwner {
     }
 
     override fun onDestroy() {
-        Calls.unlisten(callListener)
-        Calls.stop()
-        Calls.localHandImage = { null }
         steamVrLink.close()
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         windows.forEach { it.content.release() }
@@ -310,19 +303,10 @@ class VrHomeActivity : Activity(), LifecycleOwner {
         }
     }
 
-    private fun openCalls() = runOnUiThread { openWindow("calls", tr("Звонки"), ID_CALLS) { CallContent(this) } }
-
-    /** An incoming call brings the Calls window up wherever the user is. */
-    private val callListener: () -> Unit = {
-        if (Calls.state == Calls.State.RINGING && windows.none { it.id == "calls" && !it.minimized }) openCalls()
-    }
-
     private val storeHost = object : StoreContent.Host {
         override fun openWebApp(app: WebApps.App) = runOnUiThread {
             openWindow("web:${app.url}", app.name, "web:${app.url}") { BrowserContent(app.url, ::openWebXr) }
         }
-
-        override fun openCalls() = this@VrHomeActivity.openCalls()
 
         override fun install(file: java.io.File) = runOnUiThread {
             if (VirtualScreen.access() != VirtualScreen.Access.READY)
@@ -464,10 +448,9 @@ class VrHomeActivity : Activity(), LifecycleOwner {
                 HomePanel.Entry(ID_PHOTOS, tr("Фото"), drawPhotosIcon()),
                 HomePanel.Entry(ID_SETTINGS, tr("Настройки"), symbolIcon("⚙", Color.rgb(142, 142, 147))),
                 HomePanel.Entry(ID_STORE, tr("Магазин"), drawStoreIcon()),
-                HomePanel.Entry(ID_CALLS, tr("Звонки"), symbolIcon("✆", Color.rgb(48, 209, 88))),
                 HomePanel.Entry(ID_DESKTOP, tr("Компьютер"), symbolIcon("▣", Color.rgb(10, 132, 255))),
                 HomePanel.Entry(ID_LEOS, "LeOS", symbolIcon("L", Color.rgb(88, 86, 214))),
-            ) + (if (BuildConfig.LITE) emptyList() else listOf(HomePanel.Entry(ID_ELIX, "Elix", drawElixIcon()))) +
+            ) +
                 if (BuildConfig.LITE || AndroidAppsContent.enabled(this)) listOf(HomePanel.Entry(ID_ANDROID, "Android", symbolIcon("▦", Color.rgb(61, 220, 132)))) else emptyList()
             val vr = found.map {
                 HomePanel.Entry("app:${it.packageName}", it.label,
@@ -546,12 +529,6 @@ class VrHomeActivity : Activity(), LifecycleOwner {
             }
             id == ID_STORE -> openWindow("store", tr("Магазин"), ID_STORE) { StoreContent(this, storeHost) }
             id.startsWith("env:") -> setEnvironment(id.removePrefix("env:"))
-            id.startsWith("person:") -> openCalls()
-            id == ID_CALLS -> openCalls()
-            id == ID_ELIX && BuildConfig.LITE -> toast("Elix есть только в полной версии PhoneXR")
-            id == ID_ELIX -> openWindow("elix", "Elix", ID_ELIX) {
-                ElixContent(this) { action -> runOnUiThread { openEntry(HomePanel.Entry(action, "", null)) } }
-            }
             id.startsWith("app:") -> launchGame(id.removePrefix("app:"))
             id.startsWith("web:") -> id.removePrefix("web:").let { url -> openWindow("web:$url", entry.label, id) { BrowserContent(url, ::openWebXr) } }
             id.startsWith("dock:") -> windows.firstOrNull { it.id == id.removePrefix("dock:") }?.let { restore(it) }
@@ -662,17 +639,6 @@ class VrHomeActivity : Activity(), LifecycleOwner {
         }
     }
 
-    /** Small camera snapshot used to texture real-hand cut-outs in full-version calls. */
-    private fun handFrameForCall(): Bitmap? {
-        val source = arPhoto?.takeIf { !it.isRecycled }
-            ?: synchronized(frameLock) { frame?.takeIf { !it.isRecycled } }
-            ?: return null
-        return runCatching {
-            val width = 320
-            Bitmap.createScaledBitmap(source, width, width * source.height / source.width, true)
-        }.getOrNull()
-    }
-
     private fun launchGame(packageName: String) {
         val game = games[packageName] ?: return
         val intent = GameLibrary.launchIntent(this, game) ?: return toast("У «${game.label}» нет экрана запуска")
@@ -718,7 +684,6 @@ class VrHomeActivity : Activity(), LifecycleOwner {
                 games[name]?.let { HomePanel.Entry("app:$name", it.label, runCatching { packageManager.getApplicationIcon(name) }.getOrNull()) }
             } + listOf(
             HomePanel.Entry(MENU_HOME, tr("Главная"), symbolIcon("⌂", Color.rgb(90, 90, 100))),
-            HomePanel.Entry(ID_ELIX, "Elix", drawElixIcon()),
             HomePanel.Entry(MENU_PHOTO, tr("Снять фото"), symbolIcon("◉", Color.rgb(255, 159, 10))),
             HomePanel.Entry(MENU_RECENTER, tr("Выровнять"), symbolIcon("◎", Color.rgb(48, 176, 199))),
             HomePanel.Entry(MENU_BOUNDARY, tr("Граница"), symbolIcon("⬡", Color.rgb(90, 200, 250))),
@@ -1175,28 +1140,10 @@ class VrHomeActivity : Activity(), LifecycleOwner {
                 synchronized(panel) { panel.setTab(item.tab) }
                 redraw.set(true)
                 when (item.tab) {
-                    HomePanel.Tab.PEOPLE -> loadPeople()
                     HomePanel.Tab.ENVIRONMENTS -> loadEnvironments()
                     HomePanel.Tab.APPS -> Unit
                 }
             }
-        }
-    }
-
-    /** Friends on the "people" tab: tapping one opens the calls window. */
-    private fun loadPeople() {
-        thread(name = "PhoneXR people") {
-            val friends = runCatching { Friends.mine(this) }.getOrDefault(emptyList())
-            val entries = friends.map { person ->
-                HomePanel.Entry(
-                    "person:${person.username}",
-                    person.name.ifEmpty { "@" + person.username },
-                    letterIcon(person.name.ifEmpty { person.username }),
-                    badge = if (Calls.online.any { it.id == person.id }) "•" else null,
-                )
-            }
-            synchronized(panel) { panel.setPeople(entries) }
-            redraw.set(true)
         }
     }
 
@@ -1339,23 +1286,6 @@ class VrHomeActivity : Activity(), LifecycleOwner {
         canvas.drawPath(Path().apply { moveTo(c + size * .2f, c - size * .2f); lineTo(c - size * .05f, c - size * .05f); lineTo(c + size * .05f, c + size * .05f); close() }, paint)
         paint.color = Color.WHITE
         canvas.drawPath(Path().apply { moveTo(c - size * .2f, c + size * .2f); lineTo(c - size * .05f, c - size * .05f); lineTo(c + size * .05f, c + size * .05f); close() }, paint)
-    }
-
-    /** Elix: a glowing orb in Siri-like colours. */
-    private fun drawElixIcon(): Drawable = iconCanvas { canvas, size ->
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        canvas.drawColor(Color.rgb(10, 10, 16))
-        val colors = intArrayOf(Color.rgb(255, 64, 160), Color.rgb(120, 90, 255), Color.rgb(40, 200, 255), Color.rgb(255, 150, 60))
-        colors.forEachIndexed { i, color ->
-            val angle = i * Math.PI / 2
-            paint.shader = android.graphics.RadialGradient(
-                size / 2 + (Math.cos(angle) * size * .12).toFloat(), size / 2 + (Math.sin(angle) * size * .12).toFloat(), size * .3f,
-                color, Color.TRANSPARENT, Shader.TileMode.CLAMP
-            )
-            canvas.drawCircle(size / 2, size / 2, size * .42f, paint)
-        }
-        paint.shader = android.graphics.RadialGradient(size / 2, size / 2, size * .16f, Color.WHITE, Color.TRANSPARENT, Shader.TileMode.CLAMP)
-        canvas.drawCircle(size / 2, size / 2, size * .2f, paint)
     }
 
     private fun drawStoreIcon(): Drawable = iconCanvas { canvas, size ->
@@ -2245,8 +2175,6 @@ class VrHomeActivity : Activity(), LifecycleOwner {
         private const val REQUEST_PERSONA = 42
         private const val ID_SETTINGS = "own:settings"
         private const val ID_ANDROID = "own:android"
-        private const val ID_CALLS = "own:calls"
-        private const val ID_ELIX = "own:elix"
         private const val LONG_PRESS_MS = 700L
         private const val ID_PERSONA = "own:persona"
         private const val ID_LEOS = "own:leos"

@@ -71,109 +71,6 @@ class MainActivity : ComponentActivity() {
     private var androidApps by mutableStateOf(false)
     private var languagePicker by mutableStateOf(false)
 
-    // ---------------------------------------------------------------- Friends
-    private var friendsProfile by mutableStateOf<Friends.Person?>(null)
-    private var friendsMine by mutableStateOf<List<Friends.Person>>(emptyList())
-    private var friendsAddedMe by mutableStateOf<List<Friends.Person>>(emptyList())
-    private var friendsFound by mutableStateOf<List<Friends.Person>>(emptyList())
-    private var friendsQuery by mutableStateOf("")
-    private var friendsUsername by mutableStateOf("")
-    private var friendsStatus by mutableStateOf<String?>(null)
-    private var friendsLoading by mutableStateOf(false)
-
-    private fun refreshFriends() {
-        if (Account.current(this) == null) return
-        friendsLoading = true
-        Thread {
-            val result = runCatching {
-                val profile = Friends.myProfile(this)
-                val mine = if (profile != null) Friends.mine(this) else emptyList()
-                Triple(profile, mine, if (profile != null) Friends.addedMe(this, mine) else emptyList())
-            }
-            runOnUiThread {
-                friendsLoading = false
-                result.onSuccess { (profile, mine, addedMe) ->
-                    friendsProfile = profile; friendsMine = mine; friendsAddedMe = addedMe; friendsStatus = null
-                }.onFailure { friendsStatus = it.message }
-            }
-        }.start()
-    }
-
-    private fun friendsAction(action: () -> String?) {
-        Thread {
-            val error = runCatching { action() }.getOrElse { it.message }
-            runOnUiThread { friendsStatus = error; refreshFriends() }
-        }.start()
-    }
-
-    @Composable
-    private fun FriendsTab() {
-        HigPage(title = tr("Друзья"), subtitle = tr("Добавляйте друзей по юзернейму и звоните им персоной в VR"), bottomInset = TAB_BAR_ROOM) {
-            if (Account.current(this@MainActivity) == null) {
-                HigSection(footer = tr("Друзья и звонки работают с аккаунтом PhoneXR.")) {
-                    HigLink(tr("Войти")) { start(AccountActivity::class.java) }
-                }
-                return@HigPage
-            }
-            friendsStatus?.let { HigSection { HigRow(it) } }
-            val profile = friendsProfile
-            if (profile == null) {
-                HigSection(title = tr("Ваш юзернейм"), footer = tr("3–20 символов: a–z, 0–9, _ и . По нему вас найдут друзья.")) {
-                    InputRow("username", friendsUsername) { friendsUsername = it.lowercase().replace(" ", "") }
-                    HigLink(if (friendsLoading) tr("Загрузка…") else tr("Готово"), enabled = !friendsLoading) {
-                        val name = friendsUsername
-                        friendsAction { Friends.setUsername(this@MainActivity, name) }
-                    }
-                }
-                return@HigPage
-            }
-            HigSection { HigRow("@${profile.username}", profile.name) }
-            HigSection(title = tr("Найти по юзернейму")) {
-                InputRow("@username", friendsQuery) { value ->
-                    friendsQuery = value
-                    Thread {
-                        val found = runCatching { Friends.search(this@MainActivity, value) }.getOrDefault(emptyList())
-                        runOnUiThread { if (friendsQuery == value) friendsFound = found }
-                    }.start()
-                }
-                friendsFound.forEach { person ->
-                    val added = friendsMine.any { it.id == person.id }
-                    HigLink("@${person.username}", value = if (added) "✓" else tr("Добавить"), enabled = !added) {
-                        friendsAction { Friends.add(this@MainActivity, person) }
-                    }
-                }
-            }
-            if (friendsAddedMe.isNotEmpty()) HigSection(title = tr("Добавили вас")) {
-                friendsAddedMe.forEach { person ->
-                    HigLink("@${person.username}", value = tr("Добавить")) { friendsAction { Friends.add(this@MainActivity, person) } }
-                }
-            }
-            HigSection(title = tr("Мои друзья"), footer = tr("Позвонить можно из приложения «Звонки» в шлеме, когда друг в сети.")) {
-                if (friendsMine.isEmpty()) HigRow(tr("Пока пусто"))
-                friendsMine.forEach { person ->
-                    val online = Calls.online.any { it.id == person.id }
-                    HigLink("@${person.username}", value = if (online) tr("В сети") else tr("Удалить")) {
-                        if (!online) friendsAction { Friends.remove(this@MainActivity, person) }
-                    }
-                }
-            }
-        }
-    }
-
-    /** A one-line text field in a section row. */
-    @Composable
-    private fun InputRow(hint: String, value: String, onChange: (String) -> Unit) {
-        androidx.compose.foundation.layout.Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
-            if (value.isEmpty()) CupertinoText(hint, color = CupertinoTheme.colorScheme.secondaryLabel)
-            androidx.compose.foundation.text.BasicTextField(
-                value = value,
-                onValueChange = onChange,
-                singleLine = true,
-                textStyle = androidx.compose.ui.text.TextStyle(color = CupertinoTheme.colorScheme.label, fontSize = 17.sp),
-                cursorBrush = androidx.compose.ui.graphics.SolidColor(androidx.compose.ui.graphics.Color(0xFF0A84FF)),
-            )
-        }
-    }
     /** A VR mode from the store whose activation steps are shown. */
     private var guide by mutableStateOf<VrMode?>(null)
     private var webApps by mutableStateOf<List<WebApps.App>>(emptyList())
@@ -315,7 +212,6 @@ class MainActivity : ComponentActivity() {
                 when (tab) {
                     0 -> MenuTab()
                     1 -> StoreTab()
-                    2 -> FriendsTab()
                     else -> SettingsTab()
                 }
             }
@@ -323,7 +219,6 @@ class MainActivity : ComponentActivity() {
                 tabs = listOf(
                     HigTab(CupertinoIcons.Filled.House, tr("Меню")),
                     HigTab(CupertinoIcons.Filled.Cart, tr("Магазин")),
-                    HigTab(CupertinoIcons.Filled.Person, tr("Друзья")),
                     HigTab(CupertinoIcons.Filled.Gearshape, tr("Настройки"))
                 ),
                 selected = tab,
@@ -338,7 +233,7 @@ class MainActivity : ComponentActivity() {
         if (languagePicker) {
             HigAlert(
                 title = tr("Язык"),
-                message = "PhoneXR",
+                message = "PhoneXR Latitude",
                 actions = L10n.Lang.values().map { lang ->
                     HigAction((if (lang == L10n.current) "✓ " else "") + lang.title) {
                         languagePicker = false
@@ -386,7 +281,6 @@ class MainActivity : ComponentActivity() {
 
     private fun selectTab(index: Int) {
         tab = index
-        if (index == 2) refreshFriends()
         if (index == 1 && storeItems == null && !storeLoading) refreshStore()
     }
 
@@ -399,7 +293,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun MenuTab() {
         HigPage(
-            title = "PhoneXR",
+            title = "PhoneXR Latitude",
             subtitle = tr("VR на телефоне: руки в камере, Joy‑Con вместо контроллеров"),
             bottomInset = TAB_BAR_ROOM
         ) {
@@ -483,12 +377,13 @@ class MainActivity : ComponentActivity() {
         val state = if (resumes >= 0) PhoneXrRuntime.state(this) else PhoneXrRuntime.State.MISSING
         HigSection(
             title = "OpenXR",
-            footer = tr("PhoneXR Runtime заменяет Monado: OpenXR‑игры получают руки, Joy‑Con и голову от PhoneXR. ") +
-                tr("После установки выберите «PhoneXR Runtime» в OpenXR Runtime Broker.")
+            footer = "The bundled runtime is based on Monado. Select it in OpenXR Runtime Broker after installing. " +
+                "Quest titles still need compatible Android APIs and game assets."
         ) {
             when (state) {
                 PhoneXrRuntime.State.READY -> HigRow("PhoneXR Runtime", tr("Установлен"))
                 PhoneXrRuntime.State.OUTDATED -> HigLink(tr("Обновить PhoneXR Runtime")) { PhoneXrRuntime.install(this@MainActivity) }
+                PhoneXrRuntime.State.INCOMPATIBLE_BUNDLE -> HigRow("OpenXR runtime", "16 KB device: bundled native libraries need rebuilding")
                 PhoneXrRuntime.State.MISSING -> if (PhoneXrRuntime.bundled(this@MainActivity)) {
                     HigLink(tr("Установить PhoneXR Runtime")) { PhoneXrRuntime.install(this@MainActivity) }
                 } else {
@@ -606,6 +501,11 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
+                }
+            }
+            HigSection(title = "Historical releases", footer = "External archive by Another Axiom. APK compatibility and redistribution rights have not been verified.") {
+                HigLink("Gorilla Tag release archive", value = "GitHub") {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(GameStore.GORILLA_TAG_ARCHIVE)))
                 }
             }
             HigSection {
@@ -843,7 +743,7 @@ class MainActivity : ComponentActivity() {
             }
             if (BuildConfig.LITE) HigSection(
                 title = "Версия",
-                footer = "Lite не включает лицо (Persona), голосового помощника Elix, нейросеть глубины и 6DoF через " +
+                footer = "Lite не включает лицо (Persona), нейросеть глубины и 6DoF через " +
                     "ARCore, а камеру рук читает меньшим кадром — так он идёт на недорогих телефонах. " +
                     "Игры, кинотеатр, Joy‑Con и VR‑дом работают так же."
             ) {
@@ -1001,7 +901,6 @@ class MainActivity : ComponentActivity() {
             }
             HigSection {
                 HigLink(tr("Язык"), value = L10n.current.title) { languagePicker = true }
-                HigLink(tr("Аккаунт"), value = if (resumes >= 0) Account.current(this@MainActivity)?.name ?: tr("Войти") else null) { start(AccountActivity::class.java) }
                 HigLink(tr("Обновление ПО")) { start(UpdateActivity::class.java) }
                 HigLink(tr("О приложении")) { start(AboutActivity::class.java) }
             }

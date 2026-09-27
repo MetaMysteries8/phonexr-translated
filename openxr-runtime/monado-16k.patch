@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -148,6 +148,8 @@
+ 	find_package(PkgConfig MODULE)
+ endif()
+ if(ANDROID)
++	# NDK r27 and older need explicit 16 KiB ELF LOAD alignment.
++	add_link_options(-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384)
+ 	find_library(ANDROID_LIBRARY android)
+ 	find_library(ANDROID_LOG_LIBRARY log)
+ endif()
