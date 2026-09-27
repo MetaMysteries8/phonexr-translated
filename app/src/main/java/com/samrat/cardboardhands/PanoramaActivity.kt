@@ -26,6 +26,7 @@ class PanoramaActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        L10n.init(this)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, window.decorView).apply {
@@ -43,7 +44,7 @@ class PanoramaActivity : Activity() {
 
         val photo = if (isVideo) null else load(uri)
         if (!isVideo && photo == null) {
-            Toast.makeText(this, "Не удалось открыть фото", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, tr("Не удалось открыть фото"), Toast.LENGTH_LONG).show()
             finish()
             return
         }
@@ -60,7 +61,7 @@ class PanoramaActivity : Activity() {
                     }
                 }.onFailure {
                     Log.w(TAG, "Panorama video failed", it)
-                    Toast.makeText(this, "Видео не открылось", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, tr("Видео не открылось"), Toast.LENGTH_LONG).show()
                 }
             }
         })

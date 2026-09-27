@@ -12,7 +12,8 @@ class KeyboardPanel {
     private val canvas = Canvas(bitmap)
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val keys = ArrayList<Pair<RectF, String>>()
-    private var russian = true
+    private var russian = L10n.current == L10n.Lang.RU
+    private var languageChosenOnKeyboard = false
     private var shift = false
 
     /** What a pinch at 0..1 panel coordinates types: a character, or "backspace", "enter", "hide". */
@@ -20,7 +21,7 @@ class KeyboardPanel {
         val key = keys.firstOrNull { it.first.contains(u * WIDTH, v * HEIGHT) }?.second ?: return null
         return when (key) {
             SHIFT -> { shift = !shift; null }
-            LANGUAGE -> { russian = !russian; null }
+            LANGUAGE -> { russian = !russian; languageChosenOnKeyboard = true; null }
             SPACE -> " "
             BACKSPACE, ENTER, HIDE -> key
             else -> (if (shift) key.uppercase() else key).also { shift = false }
@@ -30,6 +31,9 @@ class KeyboardPanel {
     fun hovered(u: Float, v: Float): String? = keys.firstOrNull { it.first.contains(u * WIDTH, v * HEIGHT) }?.second
 
     fun draw(hover: String?) {
+        // Follow the app preference until the user explicitly switches layouts on this keyboard.
+        // VR home constructs this panel before its onCreate calls L10n.init().
+        if (!languageChosenOnKeyboard) russian = L10n.current == L10n.Lang.RU
         keys.clear()
         bitmap.eraseColor(Color.TRANSPARENT)
         paint.color = Color.argb(215, 44, 44, 50)

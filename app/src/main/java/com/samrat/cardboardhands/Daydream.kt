@@ -29,7 +29,7 @@ object Daydream {
     /** Opens the system installer for Opendream Services. */
     fun installServices(activity: Activity) {
         if (!bundled(activity)) {
-            Toast.makeText(activity, "Opendream Services нет в этой сборке PhoneXR", Toast.LENGTH_LONG).show()
+            Toast.makeText(activity, tr("Opendream Services нет в этой сборке PhoneXR"), Toast.LENGTH_LONG).show()
             return
         }
         installAsset(activity, ASSET, "opendream-services.apk")
@@ -38,7 +38,7 @@ object Daydream {
     /** Copies an APK shipped in PhoneXR's assets to the shared cache and opens the system installer. */
     fun installAsset(activity: Activity, asset: String, fileName: String) {
         if (!activity.packageManager.canRequestPackageInstalls()) {
-            Toast.makeText(activity, "Разрешите PhoneXR устанавливать приложения и повторите", Toast.LENGTH_LONG).show()
+            Toast.makeText(activity, tr("Разрешите PhoneXR устанавливать приложения и повторите"), Toast.LENGTH_LONG).show()
             activity.startActivity(Intent(AndroidSettings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:${activity.packageName}")))
             return
         }

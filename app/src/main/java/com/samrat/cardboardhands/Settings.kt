@@ -10,6 +10,7 @@ object Settings {
 
     /** What the camera reports to OpenXR. */
     enum class HandMode { CONTROLLERS, HANDS }
+    enum class FakeXrMode { OFF, STICK_HANDS, LOCOMOTION }
     enum class HomeStyle(val title: String) { LARGE("Большое"), COMPACT("Компактная панель") }
 
     /** A VR controller input a Joy-Con button can be bound to. */
@@ -64,6 +65,8 @@ object Settings {
     private const val PREFS = "phonexr"
     private const val KEY_SIX_DOF = "six_dof"
     private const val KEY_HAND_MODE = "hand_mode"
+    private const val KEY_FAKE_XR_MODE = "fake_xr_mode"
+    private const val KEY_FAKE_XR_MARKER = "fake_xr_marker"
     private const val KEY_BINDINGS = "bindings"
     private const val KEY_CAMERA_JOYCONS = "camera_joycons"
     private const val KEY_MARKER_JOYCONS = "marker_joycons"
@@ -74,6 +77,8 @@ object Settings {
     data class State(
         val sixDof: Boolean = true,
         val handMode: HandMode = HandMode.CONTROLLERS,
+        val fakeXrMode: FakeXrMode = FakeXrMode.OFF,
+        val fakeXrMarker: Boolean = false,
         /** Android key code of a Joy-Con button to the VR input it presses. */
         val bindings: Map<Int, Action> = DEFAULT_BINDINGS,
         /** Position and rotation of the Joy-Con come from the camera, which finds them by colour. */
@@ -100,6 +105,8 @@ object Settings {
         return State(
             sixDof = prefs.getBoolean(KEY_SIX_DOF, true),
             handMode = HandMode.valueOf(prefs.getString(KEY_HAND_MODE, HandMode.CONTROLLERS.name)!!),
+            fakeXrMode = runCatching { FakeXrMode.valueOf(prefs.getString(KEY_FAKE_XR_MODE, FakeXrMode.OFF.name)!!) }.getOrDefault(FakeXrMode.OFF),
+            fakeXrMarker = prefs.getBoolean(KEY_FAKE_XR_MARKER, false),
             bindings = bindings,
             cameraJoyCons = prefs.getBoolean(KEY_CAMERA_JOYCONS, false),
             markerJoyCons = prefs.getBoolean(KEY_MARKER_JOYCONS, false),
@@ -113,6 +120,8 @@ object Settings {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
             .putBoolean(KEY_SIX_DOF, state.sixDof)
             .putString(KEY_HAND_MODE, state.handMode.name)
+            .putString(KEY_FAKE_XR_MODE, state.fakeXrMode.name)
+            .putBoolean(KEY_FAKE_XR_MARKER, state.fakeXrMarker)
             .putString(KEY_BINDINGS, state.bindings.entries.joinToString(",") { "${it.key}:${it.value.name}" })
             .putBoolean(KEY_CAMERA_JOYCONS, state.cameraJoyCons)
             .putBoolean(KEY_MARKER_JOYCONS, state.markerJoyCons)

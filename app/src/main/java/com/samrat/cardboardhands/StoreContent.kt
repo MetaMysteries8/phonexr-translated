@@ -93,8 +93,8 @@ class StoreContent(private val context: Context, private val host: Host) : VrWin
     private fun build(games: List<GameStore.Item>, web: List<WebApps.App>) {
         val modes = listOf(
             Triple("Minecraft VR", "com.mojang.minecraftpe", CinemaActivity.SCENE_ROOM) to "Bedrock в гостиной с камином",
-            Triple("Roblox VR", "com.roblox.client", CinemaActivity.SCENE_ROBLOX) to "Roblox в доме из Brookhaven",
-            Triple("Brawl Stars VR", "com.supercell.brawlstars", CinemaActivity.SCENE_BRAWL) to "Посреди арены, 360°",
+            Triple("Roblox VR", "com.roblox.client", CinemaActivity.SCENE_ROBLOX) to "Roblox на экране в VR",
+            Triple("Brawl Stars VR", "com.supercell.brawlstars", CinemaActivity.SCENE_BRAWL) to "Игра на экране в VR",
         ).map { (mode, subtitle) ->
             val (title, name, scene) = mode
             Card(title, subtitle, { appIcon(name) }, { if (installed(name)) tr("Играть") else tr("Скачать") }) {

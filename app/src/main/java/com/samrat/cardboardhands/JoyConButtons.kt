@@ -107,6 +107,11 @@ object JoyConButtons {
         InputDevice.getDevice(id)?.takeIf { isController(it) }?.name
     }.distinct()
 
+    /** A conventional gamepad has no intrinsic tracked position. */
+    fun hasConventionalGamepad(): Boolean = InputDevice.getDeviceIds().any { id ->
+        InputDevice.getDevice(id)?.let { isController(it) && !isJoyCon(it) } == true
+    }
+
     /** Returns true when the event came from a controller, so the game never sees it. */
     fun onKey(event: KeyEvent): Boolean {
         val device = InputDevice.getDevice(event.deviceId)

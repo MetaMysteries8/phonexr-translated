@@ -170,15 +170,14 @@ object GameLibrary {
     }.getOrDefault(false)
 
     fun launchIntent(context: Context, game: Game): Intent? =
-        // Gear VR games declare MAIN + INFO instead of a launcher entry; this finds both.
-        context.packageManager.getLaunchIntentForPackage(game.packageName)
-            ?: vrCategories.firstNotNullOfOrNull { category ->
+        // Prefer an app's declared immersive entrypoint over its ordinary flat launcher.
+        vrCategories.firstNotNullOfOrNull { category ->
                 context.packageManager.queryIntentActivities(
                     Intent(Intent.ACTION_MAIN).addCategory(category).setPackage(game.packageName), 0
                 ).firstOrNull()?.activityInfo?.let { activity ->
-                    Intent(Intent.ACTION_MAIN).setClassName(activity.packageName, activity.name)
+                    Intent(Intent.ACTION_MAIN).addCategory(category).setClassName(activity.packageName, activity.name)
                 }
-            }
+            } ?: context.packageManager.getLaunchIntentForPackage(game.packageName)
 
     /** The line under the game's name in the list: what it is and what PhoneXR has to do with it. */
     fun describe(game: Game) = when (game.kind) {
