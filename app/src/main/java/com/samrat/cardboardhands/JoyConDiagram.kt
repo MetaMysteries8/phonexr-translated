@@ -44,8 +44,8 @@ fun JoyConDiagram(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Side("Левый", true, state, left, onPick, Modifier.weight(1f, fill = true))
-        Side("Правый", false, state, right, onPick, Modifier.weight(1f, fill = true))
+        Side("Left", true, state, left, onPick, Modifier.weight(1f, fill = true))
+        Side("Right", false, state, right, onPick, Modifier.weight(1f, fill = true))
     }
 }
 
@@ -63,7 +63,7 @@ private fun Side(
     val spots = spots(isLeft)
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         CupertinoText(
-            "$title${if (live.connected) "" else " — не подключён"}",
+            "$title${if (live.connected) "" else " — disconnected"}",
             style = CupertinoTheme.typography.subhead,
             color = if (live.connected) scheme.label else scheme.secondaryLabel
         )
@@ -155,7 +155,7 @@ private fun DrawScope.drawStick(live: JoyConButtons.Live, outline: Color, active
 private fun spots(isLeft: Boolean): List<Spot> = if (isLeft) listOf(
     Spot(KeyEvent.KEYCODE_BUTTON_L2, "ZL", Rect(.10f, .05f, .48f, .12f)),
     Spot(KeyEvent.KEYCODE_BUTTON_L1, "L / SL", Rect(.52f, .05f, .90f, .12f)),
-    Spot(KeyEvent.KEYCODE_BUTTON_THUMBL, "стик", Rect(.34f, .44f, .66f, .52f)),
+    Spot(KeyEvent.KEYCODE_BUTTON_THUMBL, "stick", Rect(.34f, .44f, .66f, .52f)),
     Spot(KeyEvent.KEYCODE_DPAD_UP, "↑", Rect(.36f, .56f, .64f, .64f)),
     Spot(KeyEvent.KEYCODE_DPAD_LEFT, "←", Rect(.10f, .66f, .46f, .74f)),
     Spot(KeyEvent.KEYCODE_DPAD_RIGHT, "→", Rect(.54f, .66f, .90f, .74f)),
@@ -164,7 +164,7 @@ private fun spots(isLeft: Boolean): List<Spot> = if (isLeft) listOf(
 ) else listOf(
     Spot(KeyEvent.KEYCODE_BUTTON_R1, "R / SR", Rect(.10f, .05f, .48f, .12f)),
     Spot(KeyEvent.KEYCODE_BUTTON_R2, "ZR", Rect(.52f, .05f, .90f, .12f)),
-    Spot(KeyEvent.KEYCODE_BUTTON_THUMBR, "стик", Rect(.34f, .44f, .66f, .52f)),
+    Spot(KeyEvent.KEYCODE_BUTTON_THUMBR, "stick", Rect(.34f, .44f, .66f, .52f)),
     Spot(KeyEvent.KEYCODE_BUTTON_X, "X", Rect(.36f, .56f, .64f, .64f)),
     Spot(KeyEvent.KEYCODE_BUTTON_Y, "Y", Rect(.10f, .66f, .46f, .74f)),
     Spot(KeyEvent.KEYCODE_BUTTON_A, "A", Rect(.54f, .66f, .90f, .74f)),

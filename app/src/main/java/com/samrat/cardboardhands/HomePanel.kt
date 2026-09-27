@@ -13,7 +13,7 @@ import android.text.TextPaint
 import android.text.TextUtils
 
 /**
- * visionOS-style home: round app icons floating in the room, a few rows per page with page dots.
+ * Latitude home: app icons floating in the room, a few rows per page with page dots.
  * [Mode.STORE] shows web apps from the PhoneXR store, [Mode.MENU] the system menu.
  * Everything is drawn into one transparent bitmap that the VR scene places in front of the user.
  */
@@ -136,6 +136,11 @@ class HomePanel {
             }
             Mode.HOME -> {
                 drawRail(hovered)
+                label.textSize = 24f
+                label.color = Color.rgb(164, 241, 231)
+                canvas.drawText("LATITUDE", WIDTH / 2f, 117f, label)
+                label.color = Color.WHITE
+                label.textSize = 30f
                 canvas.drawText(tr(when (tab) {
                     Tab.APPS -> "Приложения"
                     Tab.ENVIRONMENTS -> "Окружения"
@@ -290,7 +295,7 @@ class HomePanel {
             val target = Target.Rail(item)
             val chosen = item == tab
             if (chosen || target == hovered) {
-                fill.color = Color.argb(if (chosen) 235 else 110, 255, 255, 255)
+                fill.color = if (chosen) Color.rgb(164, 241, 231) else Color.argb(110, 255, 255, 255)
                 canvas.drawCircle(RAIL_X, y, 62f, fill)
             }
             fill.color = if (chosen) Color.rgb(30, 30, 36) else Color.WHITE

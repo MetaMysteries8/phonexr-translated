@@ -89,7 +89,8 @@ object AndroidManifestPatcher {
 
     private fun isHeadsetFeature(name: String) = name.startsWith("oculus.") ||
         name.startsWith("com.oculus.") || name.startsWith("android.hardware.vr") ||
-        name.startsWith("wave.feature") || name.startsWith("picovr")
+        name.startsWith("wave.feature") || name.startsWith("picovr") ||
+        name.startsWith("android.software.xr.") || name.startsWith("android.hardware.xr.")
 
     /** A string value of an element to be written, e.g. android:name="…". */
     private class Attribute(val namespace: Int, val name: Int, val value: Int)
@@ -256,7 +257,7 @@ object AndroidManifestPatcher {
         /** See [AndroidManifestPatcher.markers]. */
         fun markers(): Set<String> = nodes.mapNotNullTo(mutableSetOf()) { node ->
             if (node !is Node.Original || type(node) != CHUNK_START_ELEMENT) null
-            else if (name(node) != "meta-data" && name(node) != "category") null
+            else if (name(node) !in setOf("meta-data", "category", "property", "uses-feature")) null
             else attributeValue(node, "name")
         }
 

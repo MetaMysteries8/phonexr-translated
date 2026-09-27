@@ -696,7 +696,7 @@ class MainActivity : ComponentActivity() {
     private val spatialAudio: String
         get() = if (android.os.Build.VERSION.SDK_INT >= 32 &&
             getSystemService(android.media.AudioManager::class.java)?.spatializer?.isAvailable == true
-        ) "Телефон умеет — включён для видео и кино" else "Телефон не поддерживает"
+        ) "Available for video and cinema" else "Not supported by this phone"
     private var depthInstalled by mutableStateOf(false)
     private var depthProgress by mutableStateOf<Float?>(null)
 
@@ -711,7 +711,7 @@ class MainActivity : ComponentActivity() {
             runOnUiThread {
                 depthProgress = null
                 result.onSuccess { depthInstalled = true }
-                    .onFailure { error = "Нейросеть не скачалась: ${it.localizedMessage ?: it.javaClass.simpleName}" }
+                    .onFailure { error = "Depth model download failed: ${it.localizedMessage ?: it.javaClass.simpleName}" }
             }
         }.start()
     }
@@ -725,34 +725,34 @@ class MainActivity : ComponentActivity() {
                 HigLink(tr("Joy‑Con через камеру")) { start(JoyConCameraActivity::class.java) }
             }
             HigSection(
-                title = "Отслеживание головы",
-                footer = "3DoF отслеживает поворот. 6DoF через ARCore отслеживает ещё и перемещение по комнате."
+                title = "Head tracking",
+                footer = "3DoF follows head rotation. 6DoF also tracks your position through ARCore."
             ) {
-                HigChoice("3DoF", "Поворот головы", !sixDof) {
+                HigChoice("3DoF", "Head rotation", !sixDof) {
                     sixDof = false
                     Settings.save(this@MainActivity, Settings.load(this@MainActivity).copy(sixDof = false))
                 }
                 if (BuildConfig.LITE) {
-                    HigRow("6DoF", "Доступно в PhoneXR Full", detailColor = HigColors.secondary)
+                    HigRow("6DoF", "Available in Latitude Full", detailColor = HigColors.secondary)
                 } else {
-                    HigChoice("6DoF", "Поворот и перемещение", sixDof) {
+                    HigChoice("6DoF", "Rotation and position", sixDof) {
                         sixDof = true
                         Settings.save(this@MainActivity, Settings.load(this@MainActivity).copy(sixDof = true))
                     }
                 }
             }
             if (BuildConfig.LITE) HigSection(
-                title = "Версия",
-                footer = "Lite не включает лицо (Persona), нейросеть глубины и 6DoF через " +
-                    "ARCore, а камеру рук читает меньшим кадром — так он идёт на недорогих телефонах. " +
-                    "Игры, кинотеатр, Joy‑Con и VR‑дом работают так же."
+                title = "Edition",
+                footer = "Lite leaves out Persona, depth estimation, and ARCore 6DoF. " +
+                    "It uses a smaller camera frame for hand tracking. " +
+                    "Games, cinema, controllers, and VR home remain available."
             ) {
-                HigRow("PhoneXR Lite", "Облегчённая сборка", detailColor = HigColors.accent)
+                HigRow("Latitude Lite", "Lightweight edition", detailColor = HigColors.accent)
             }
             if (!BuildConfig.LITE) {
                 HigSection(
-                    title = "Лицо",
-                    footer = "Не вынимайте телефон из Cardboard: внешняя камера снимет лицо спереди и с боков."
+                    title = "Persona",
+                    footer = "The outward camera captures a face scan while the phone is in the viewer."
                 ) {
                     HigLink(tr("Сканировать камерой"), value = if (resumes >= 0 && Persona.exists(this@MainActivity)) tr("Готово") else null) {
                         start(PersonaCaptureActivity::class.java)
@@ -760,132 +760,132 @@ class MainActivity : ComponentActivity() {
                 }
             }
             HigSection(
-                title = "Мультидевайс",
-                footer = "Общий буфер: скопировали текст на одном телефоне — вставляете на другом. " +
-                    "Оба должны быть в одной сети Wi‑Fi."
+                title = "Other devices",
+                footer = "Copy text on one phone and paste it on another. " +
+                    "Both phones must share a Wi-Fi network."
             ) {
-                HigSwitchRow("Общий буфер обмена", clipboard) {
+                HigSwitchRow("Shared clipboard", clipboard) {
                     clipboard = it
                     Settings.setSharedClipboard(this@MainActivity, it)
                     if (it) SharedClipboard.start(this@MainActivity) else SharedClipboard.stop()
                 }
-                HigLink("Отправить буфер на другой телефон") {
+                HigLink("Send clipboard to another phone") {
                     val sent = SharedClipboard.send(this@MainActivity)
-                    status = if (sent == null) "Буфер обмена пуст" else "Отправлено: ${sent.take(40)}"
+                    status = if (sent == null) "Clipboard is empty" else "Sent: ${sent.take(40)}"
                 }
             }
             HigSection(
-                title = "Система",
-                footer = "В транспорте вид перестаёт уезжать за поворотами машины или поезда. " +
-                    "Гостевой режим держит чужую калибровку и настройки отдельно от ваших."
+                title = "System",
+                footer = "Travel mode reduces view drift in a moving vehicle. " +
+                    "Guest mode keeps a visitor’s calibration and settings separate."
             ) {
-                HigSwitchRow("Режим транспорта", travel) {
+                HigSwitchRow("Travel mode", travel) {
                     travel = it
                     Settings.setTravelMode(this@MainActivity, it)
                 }
-                HigSwitchRow("Гостевой режим", guest) {
+                HigSwitchRow("Guest mode", guest) {
                     guest = it
                     Settings.setGuestMode(this@MainActivity, it)
                 }
-                HigRow("Объёмный звук", spatialAudio, detailColor = HigColors.secondary)
+                HigRow("Spatial audio", spatialAudio, detailColor = HigColors.secondary)
             }
             HigSection(title = tr("Проверка")) {
                 HigLink(tr("Проверить гироскоп Joy‑Con")) { start(GyroTestActivity::class.java) }
             }
             HigSection(
-                title = "Плавность трекинга рук",
-                footer = "0 — минимальная задержка, но больше дрожания. 100 — самые плавные руки, но реакция мягче."
+                title = "Hand tracking smoothing",
+                footer = "0 responds fastest but may jitter. 100 is steadier but responds more slowly."
             ) {
-                HigStepper("Сглаживание", "$trackingSmoothness%") { step ->
+                HigStepper("Smoothing", "$trackingSmoothness%") { step ->
                     trackingSmoothness = (trackingSmoothness + step * 5).coerceIn(0, 100)
                     val current = Settings.load(this@MainActivity)
                     Settings.save(this@MainActivity, current.copy(trackingSmoothness = trackingSmoothness))
                 }
             }
             HigSection(
-                title = "Второй телефон",
-                footer = "Второй телефон становится указкой для кинотеатра: куда наведёте — туда и нажмёт. " +
-                    "Откройте этот экран на нём, оба телефона — в одной сети Wi‑Fi."
+                title = "Second phone",
+                footer = "Use a second phone as a cinema pointer. " +
+                    "Open this screen on that phone; connect both to the same Wi-Fi network."
             ) {
-                HigLink("Сделать этот телефон контроллером") { start(ControllerActivity::class.java) }
+                HigLink("Use this phone as a controller") { start(ControllerActivity::class.java) }
             }
             HigSection(title = tr("Магазин"), footer = tr("Игры и веб‑приложения берутся из вашего репозитория магазина на GitHub.")) {
                 HigRow(tr("Магазин"), GameStore.REPOSITORY)
             }
             HigSection(
-                title = "Линзы и глаза",
-                footer = "Если в шлеме картинка двоится — сначала подберите межзрачковое расстояние " +
-                    "(как у вас между зрачками), затем сдвиг: он двигает половинки экрана под линзы. " +
-                    "Настройки применяются при следующем входе в VR."
+                title = "Lenses and display",
+                footer = "If the image looks doubled, adjust the interpupillary distance first, " +
+                    "then shift each half of the screen under the lenses. " +
+                    "Changes take effect the next time you enter VR."
             ) {
-                HigStepper("Межзрачковое расстояние", "$ipd мм") { step ->
+                HigStepper("Interpupillary distance", "$ipd mm") { step ->
                     ipd = (ipd + step).coerceIn(Settings.MIN_IPD_MM, Settings.MAX_IPD_MM)
                     Settings.setIpdMm(this@MainActivity, ipd)
                 }
-                HigLink("Сканировать QR шлема", value = "Google Cardboard") { scanCardboardProfile() }
-                HigStepper("Сдвиг картинок под линзы", "$lensOffset мм") { step ->
+                HigLink("Scan viewer QR code", value = "Google Cardboard") { scanCardboardProfile() }
+                HigStepper("Lens offset", "$lensOffset mm") { step ->
                     lensOffset = (lensOffset + step).coerceIn(-Settings.MAX_LENS_MM, Settings.MAX_LENS_MM)
                     Settings.setLensOffsetMm(this@MainActivity, lensOffset)
                 }
-                HigSwitchRow("Панель следует за взглядом", panelFollows) {
+                HigSwitchRow("Panel follows gaze", panelFollows) {
                     panelFollows = it
                     Settings.setPanelFollows(this@MainActivity, it)
                 }
             }
             HigSection(
-                title = "Экран кинотеатра",
-                footer = "Широкий экран — это широкий виртуальный дисплей: игра сама рисует больше, " +
-                    "чем на 16:9. Изогнутый держит края экрана на том же расстоянии, что и середину. " +
-                    "Окно под клавиатуру показывает стол с камеры, пока вы печатаете на настоящей клавиатуре."
+                title = "Cinema screen",
+                footer = "A wider virtual screen gives games more room to render. " +
+                    "A curved screen keeps its edges at a more even distance. " +
+                    "The keyboard window shows your desk while typing on a physical keyboard."
             ) {
                 Settings.ScreenShape.entries.forEach { shape ->
-                    HigChoice(shape.title, shape.detail, screenShape == shape) {
+                    HigChoice(tr(shape.title), tr(shape.detail), screenShape == shape) {
                         screenShape = shape
                         Settings.setScreenShape(this@MainActivity, shape)
                     }
                 }
-                HigSwitchRow("Изогнутый экран", curvedScreen) {
+                HigSwitchRow("Curved screen", curvedScreen) {
                     curvedScreen = it
                     Settings.setCurvedScreen(this@MainActivity, it)
                 }
-                HigSwitchRow("Окно под клавиатуру", keyboardWindow) {
+                HigSwitchRow("Keyboard passthrough window", keyboardWindow) {
                     keyboardWindow = it
                     Settings.setKeyboardWindow(this@MainActivity, it)
                 }
             }
             if (!BuildConfig.LITE) HigSection(
-                title = "3D‑воспоминания",
-                footer = "Нейросеть глубины смотрит на обычное фото и говорит, что на нём ближе, а что дальше — " +
-                    "из этого PhoneXR делает 3D‑снимок для двух глаз. Она большая, поэтому скачивается отдельно " +
-                    "и лежит в памяти приложения. Видео и панорамы 360° работают без неё."
+                title = "3D photos",
+                footer = "The depth model estimates near and far areas in a photo. " +
+                    "Latitude uses it to create a stereo image. The model downloads separately " +
+                    "and stays in app storage. Videos and 360° panoramas do not need it."
             ) {
                 when {
                     depthProgress != null -> HigRow(
-                        "Нейросеть глубины",
-                        "Скачиваю: ${((depthProgress ?: 0f) * 100).roundToInt()}%",
+                        "Depth model",
+                        "Downloading: ${((depthProgress ?: 0f) * 100).roundToInt()}%",
                         trailing = { HigSpinner() }
                     )
-                    depthInstalled -> HigRow("Нейросеть глубины", "Готова", detailColor = HigColors.good)
-                    else -> HigLink("Скачать нейросеть глубины", value = "${DepthModel.MEGABYTES} МБ") { downloadDepth() }
+                    depthInstalled -> HigRow("Depth model", "Ready", detailColor = HigColors.good)
+                    else -> HigLink("Download depth model", value = "${DepthModel.MEGABYTES} MB") { downloadDepth() }
                 }
-                if (depthInstalled) HigLink("Удалить нейросеть") {
+                if (depthInstalled) HigLink("Remove depth model") {
                     DepthModel.close()
                     DepthModel.file(this@MainActivity).delete()
                     depthInstalled = false
                 }
             }
             HigSection(
-                title = "Частота обновления",
+                title = "Refresh rate",
                 footer = rates.let { list ->
-                    if (list.isEmpty()) "Телефон не сообщает, какие частоты он умеет."
-                    else "Телефон умеет: " + list.joinToString(", ") { "$it Гц" } +
-                        ". Выше — плавнее движение головы, но батарея садится быстрее."
+                    if (list.isEmpty()) "This phone does not report its supported refresh rates."
+                    else "Supported: " + list.joinToString(", ") { "$it Hz" } +
+                        ". Higher rates feel smoother but use more battery."
                 }
             ) {
                 Settings.Refresh.entries
                     .filter { it == Settings.Refresh.AUTO || rates.isEmpty() || rates.any { hz -> hz >= it.hz } }
                     .forEach { option ->
-                        HigChoice(option.title, null, refresh == option) {
+                        HigChoice(tr(option.title), null, refresh == option) {
                             refresh = option
                             Settings.setRefresh(this@MainActivity, option)
                         }
@@ -893,7 +893,7 @@ class MainActivity : ComponentActivity() {
             }
             HigSection(
                 title = tr("Оформление"),
-                footer = "Material You берёт цвета из обоев системы на Android 12 и новее."
+                footer = "Material You uses system wallpaper colors on Android 12 and later."
             ) {
                 UiStyle.entries.forEach { style ->
                     HigChoice(style.title, style.detail, Ui.style == style) { Ui.set(this@MainActivity, style) }

@@ -75,7 +75,7 @@ class SettingsActivity : ComponentActivity() {
                 HigChoice("3DoF", tr("Поворот головы без перемещения"), !state.sixDof) {
                     update(state.copy(sixDof = false))
                 }
-                if (BuildConfig.LITE) HigRow("6DoF", tr("Только в PhoneXR Full"), detailColor = HigColors.secondary)
+                if (BuildConfig.LITE) HigRow("6DoF", "Latitude Full only", detailColor = HigColors.secondary)
                 else HigChoice("6DoF", tr("Поворот и перемещение через ARCore"), state.sixDof) {
                     update(state.copy(sixDof = true))
                 }

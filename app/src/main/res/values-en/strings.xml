@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="joycon_service_label">PhoneXR Joy‑Con</string>
+    <string name="joycon_service_label">Latitude Controller</string>
     <string name="joycon_service_description">Maps Joy‑Con button presses to VR controller buttons in OpenXR games. It only reads Joy‑Con buttons and does not intercept other keys.</string>
 </resources>
