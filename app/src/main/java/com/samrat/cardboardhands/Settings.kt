@@ -11,18 +11,18 @@ object Settings {
     /** What the camera reports to OpenXR. */
     enum class HandMode { CONTROLLERS, HANDS }
     enum class FakeXrMode { OFF, STICK_HANDS, LOCOMOTION }
-    enum class HomeStyle(val title: String) { LARGE("Большое"), COMPACT("Компактная панель") }
+    enum class HomeStyle(val title: String) { LARGE("Large"), COMPACT("Compact bar") }
 
     /** A VR controller input a Joy-Con button can be bound to. */
     enum class Action(val title: String, val hint: String, val bit: Int) {
-        TRIGGER("Курок", "удар, выстрел, выбор в меню", JoyConButtons.TRIGGER),
-        SQUEEZE("Захват", "взять предмет, держать саблю", JoyConButtons.SQUEEZE),
-        PRIMARY("A / X", "нижняя кнопка контроллера", JoyConButtons.PRIMARY),
-        SECONDARY("B / Y", "верхняя кнопка контроллера", JoyConButtons.SECONDARY),
-        MENU("Меню", "пауза, выход в меню игры", JoyConButtons.MENU),
-        STICK_CLICK("Нажатие стика", "бег, приседание — зависит от игры", JoyConButtons.STICK_CLICK),
-        SYSTEM("Системная", "редко используется играми", JoyConButtons.SYSTEM),
-        NONE("Не назначено", "кнопка ничего не делает", 0),
+        TRIGGER("Trigger", "fire or select", JoyConButtons.TRIGGER),
+        SQUEEZE("Grip", "hold an object", JoyConButtons.SQUEEZE),
+        PRIMARY("A / X", "primary controller button", JoyConButtons.PRIMARY),
+        SECONDARY("B / Y", "secondary controller button", JoyConButtons.SECONDARY),
+        MENU("Menu", "pause or open game menu", JoyConButtons.MENU),
+        STICK_CLICK("Stick press", "game-dependent movement action", JoyConButtons.STICK_CLICK),
+        SYSTEM("System", "system button", JoyConButtons.SYSTEM),
+        NONE("Unassigned", "button does nothing", 0),
     }
 
     /**
@@ -150,16 +150,16 @@ object Settings {
 
     /** The shape of the cinema screen: how wide the picture is and whether it wraps around. */
     enum class ScreenShape(val title: String, val detail: String, val width: Int, val height: Int) {
-        NORMAL("Обычный 16:9", "Как телевизор: 1920×1080", 1920, 1080),
-        WIDE("Широкий 21:9", "Как в кино: 2560×1080", 2560, 1080),
-        ULTRA("Панорамный 32:9", "Во весь обзор: 3840×1080", 3840, 1080);
+        NORMAL("Normal 16:9", "TV-like: 1920×1080", 1920, 1080),
+        WIDE("Wide 21:9", "Cinema-like: 2560×1080", 2560, 1080),
+        ULTRA("Panoramic 32:9", "Full view: 3840×1080", 3840, 1080);
 
         val aspect get() = width.toFloat() / height
     }
 
     /** How often the phone's own screen is redrawn; higher is smoother and eats more battery. */
     enum class Refresh(val title: String, val hz: Int) {
-        AUTO("Автоматически", 0), HZ60("60 Гц", 60), HZ90("90 Гц", 90), HZ120("120 Гц", 120)
+        AUTO("Automatic", 0), HZ60("60 Hz", 60), HZ90("90 Hz", 90), HZ120("120 Hz", 120)
     }
 
     fun screenShape(context: Context): ScreenShape = runCatching {
@@ -290,12 +290,12 @@ object Settings {
         KeyEvent.KEYCODE_BUTTON_R2 -> "ZR"
         KeyEvent.KEYCODE_BUTTON_START -> "+"
         KeyEvent.KEYCODE_BUTTON_SELECT -> "−"
-        KeyEvent.KEYCODE_BUTTON_THUMBL, KeyEvent.KEYCODE_BUTTON_THUMBR -> "стик"
+        KeyEvent.KEYCODE_BUTTON_THUMBL, KeyEvent.KEYCODE_BUTTON_THUMBR -> "Stick"
         KeyEvent.KEYCODE_BUTTON_MODE -> "Home"
         KeyEvent.KEYCODE_DPAD_UP -> "↑"
         KeyEvent.KEYCODE_DPAD_DOWN -> "↓"
         KeyEvent.KEYCODE_DPAD_LEFT -> "←"
         KeyEvent.KEYCODE_DPAD_RIGHT -> "→"
-        else -> "код $code"
+        else -> "Key $code"
     }
 }

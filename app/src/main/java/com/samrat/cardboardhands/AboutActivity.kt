@@ -32,7 +32,7 @@ class AboutActivity : ComponentActivity() {
 
     @Composable
     private fun About() {
-        HigPage(title = "О приложении", onBack = ::finish) {
+        HigPage(title = tr("О приложении"), onBack = ::finish) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -41,24 +41,32 @@ class AboutActivity : ComponentActivity() {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 AppIcon()
-                CupertinoText("PhoneXR", style = CupertinoTheme.typography.title1)
+                CupertinoText("PhoneXR Latitude", style = CupertinoTheme.typography.title1)
                 CupertinoText(
-                    "Версия ${BuildConfig.VERSION_NAME}",
+                    "Version ${BuildConfig.VERSION_NAME}",
                     color = CupertinoTheme.colorScheme.secondaryLabel
                 )
                 CupertinoText(
-                    "VR на обычном телефоне: OpenXR через Monado, трекинг рук камерой, Joy‑Con вместо контроллеров " +
-                        "и переходник для игр Gear VR.",
+                    "OpenXR on your phone, camera hand tracking, and gamepad controls. " +
+                        "The bundled runtime is based on Monado.",
                     style = CupertinoTheme.typography.subhead,
                     textAlign = TextAlign.Center,
                     color = CupertinoTheme.colorScheme.secondaryLabel
                 )
             }
             HigSection(
-                title = "Благодарности",
-                footer = "Комната кинотеатра: «minecraft vr Living Room» от Piethekiddev (Sketchfab), лицензия CC BY 4.0."
+                title = "PhoneXR Latitude",
+                footer = "This fork keeps the original project's license and third-party attribution."
             ) {
-                HigLink("Модель комнаты на Sketchfab") {
+                HigLink("Latitude source", value = "GitHub") {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/MetaMysteries8/phonexr-translated")))
+                }
+            }
+            HigSection(
+                title = "Credits",
+                footer = "Cinema room: “minecraft vr Living Room” by Piethekiddev, CC BY 4.0."
+            ) {
+                HigLink("Cinema room model") {
                     startActivity(
                         Intent(
                             Intent.ACTION_VIEW,
@@ -67,10 +75,10 @@ class AboutActivity : ComponentActivity() {
                     )
                 }
             }
-            HigSection(title = "Команда", footer = "Made with ❤️") {
-                Person("Разработчик", "@Beketov_samrat")
-                Person("Тестировщик", "@livebradar")
-                Person("Дизайнер", "@Freddytech87")
+            HigSection(title = "Original PhoneXR contributors") {
+                Person("Developer", "@Beketov_samrat")
+                Person("Tester", "@livebradar")
+                Person("Designer", "@Freddytech87")
             }
         }
     }

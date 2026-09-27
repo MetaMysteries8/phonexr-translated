@@ -26,7 +26,7 @@ object GameLibrary {
 
     /** The headset a build was made for. Quest and Gear VR both draw through VrApi, so the
      *  manifest — not the library — says which one it is. */
-    enum class Headset(val title: String) { QUEST("Quest"), GEAR_VR("Gear VR"), UNKNOWN("VR‑гарнитура") }
+    enum class Headset(val title: String) { QUEST("Quest"), GEAR_VR("Gear VR"), ANDROID_XR("Android XR"), UNKNOWN("VR headset") }
 
     data class Game(
         val packageName: String,
@@ -116,6 +116,7 @@ object GameLibrary {
      * builds name Samsung's VR mode and are 32-bit, because no 64-bit Gear VR ever existed.
      */
     fun headsetOf(markers: Set<String>, sixtyFour: Boolean): Headset = when {
+        markers.any { it.startsWith("android.software.xr.") || it.startsWith("android.hardware.xr.") || it.startsWith("android.window.PROPERTY_XR_") } -> Headset.ANDROID_XR
         markers.any { it.startsWith("com.oculus.supportedDevices") } -> Headset.QUEST
         markers.any { it == "com.samsung.android.vr.application.mode" } -> Headset.GEAR_VR
         markers.any { it.startsWith("com.oculus.") } -> Headset.QUEST

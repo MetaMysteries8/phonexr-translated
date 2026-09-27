@@ -3,7 +3,7 @@ name: Android debug build
 on:
   pull_request:
   push:
-    branches: [codex/english-localization]
+    branches: [main, 'codex/**']
   workflow_dispatch:
 
 jobs:

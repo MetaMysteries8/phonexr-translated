@@ -16,7 +16,7 @@ import java.net.URL
  * shown like a firmware update. Only the version and size are shown, no release notes.
  */
 object Updates {
-    private const val REPO = "samrat1games/phonexr"
+    private const val REPO = "MetaMysteries8/phonexr-translated"
     private const val PREFS = "updates"
 
     data class Release(val version: String, val url: String, val size: Long)
@@ -43,7 +43,7 @@ object Updates {
             val version = release.getString("tag_name").removePrefix("v")
             val assets = release.getJSONArray("assets")
             val apk = (0 until assets.length()).map { assets.getJSONObject(it) }
-                .firstOrNull { it.getString("name").startsWith("PhoneXR") && it.getString("name").endsWith(".apk") } ?: continue
+                .firstOrNull { it.getString("name").startsWith("PhoneXR-Latitude") && it.getString("name").endsWith(".apk") } ?: continue
             return if (newer(version, current)) Release(version, apk.getString("browser_download_url"), apk.getLong("size")) else null
         }
         return null
@@ -51,7 +51,7 @@ object Updates {
 
     /** Downloads the update into the shared cache, reporting progress 0..1. */
     fun download(context: Context, release: Release, onProgress: (Float) -> Unit): File {
-        val file = File(File(context.cacheDir, "patched").apply { mkdirs() }, "PhoneXR-${release.version}.apk")
+        val file = File(File(context.cacheDir, "patched").apply { mkdirs() }, "PhoneXR-Latitude-${release.version}.apk")
         var address = URL(release.url)
         var connection: HttpURLConnection
         while (true) {
@@ -90,8 +90,8 @@ object Updates {
         })
     }
 
-    fun formatSize(bytes: Long) = if (bytes >= 1L shl 30) "%.2f ГБ".format(bytes / (1L shl 30).toDouble())
-    else "%.0f МБ".format(bytes / (1L shl 20).toDouble())
+    fun formatSize(bytes: Long) = if (bytes >= 1L shl 30) "%.2f GB".format(bytes / (1L shl 30).toDouble())
+    else "%.0f MB".format(bytes / (1L shl 20).toDouble())
 
     /** 1.0.10 is newer than 1.0.9. */
     fun newer(candidate: String, current: String): Boolean {

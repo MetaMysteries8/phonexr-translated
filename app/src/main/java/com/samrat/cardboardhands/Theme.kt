@@ -83,14 +83,14 @@ import androidx.compose.material3.ColorScheme as MaterialColors
 import androidx.compose.material3.darkColorScheme as materialDarkColors
 import androidx.compose.material3.lightColorScheme as materialLightColors
 
-/** PhoneXR orange, the accent of the launcher icon. */
-private val orange = Color(0xFFFF7A1A)
-private val orangeDark = Color(0xFFFF9544)
+/** Latitude's deep teal UI accent, paired with the mint launcher mark. */
+private val latitude = Color(0xFF087F83)
+private val latitudeDark = Color(0xFF67D8D0)
 
 /** The two looks PhoneXR can wear. The user picks one in Settings, and it applies at once. */
 enum class UiStyle(val title: String, val detail: String) {
-    CUPERTINO("PhoneXR UI", "Сгруппированные списки и оранжевый акцент PhoneXR"),
-    MATERIAL("Material You", "Как в Android: карточки и цвета из обоев системы")
+    CUPERTINO("Latitude", "Grouped controls with Latitude colors"),
+    MATERIAL("Material You", "Android colors drawn from your wallpaper")
 }
 
 /** The chosen look, where every screen can read it and recompose the moment it changes. */
@@ -108,7 +108,7 @@ object Ui {
     }
 }
 
-/** Apple HIG (compose-hig) or Material You, in light and dark. */
+/** Latitude or Material You, in light and dark. */
 @Composable
 fun PhoneXRTheme(content: @Composable () -> Unit) {
     val context = LocalContext.current
@@ -121,17 +121,17 @@ fun PhoneXRTheme(content: @Composable () -> Unit) {
             CupertinoTheme(colorScheme = cupertinoFrom(colors, dark), content = content)
         }
     } else {
-        val colors = if (dark) darkColorScheme(accent = orangeDark) else lightColorScheme(accent = orange)
+        val colors = if (dark) darkColorScheme(accent = latitudeDark) else lightColorScheme(accent = latitude)
         CupertinoTheme(colorScheme = colors, content = content)
     }
 }
 
-/** Material You: the wallpaper palette on Android 12 and newer, the PhoneXR orange before that. */
+/** Material You: the wallpaper palette on Android 12 and newer, Latitude teal before that. */
 private fun materialColors(context: Context, dark: Boolean): MaterialColors = when {
     Build.VERSION.SDK_INT >= 31 && dark -> dynamicDarkColorScheme(context)
     Build.VERSION.SDK_INT >= 31 -> dynamicLightColorScheme(context)
-    dark -> materialDarkColors(primary = orangeDark, secondary = orangeDark)
-    else -> materialLightColors(primary = orange, secondary = orange)
+    dark -> materialDarkColors(primary = latitudeDark, secondary = latitudeDark)
+    else -> materialLightColors(primary = latitude, secondary = latitude)
 }
 
 /** The Material palette said in Cupertino's words, so both looks agree on colour. */

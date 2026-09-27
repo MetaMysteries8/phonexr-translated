@@ -405,14 +405,14 @@ class HandTrackingService : LifecycleService() {
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= 26) {
             getSystemService(NotificationManager::class.java).createNotificationChannel(
-                NotificationChannel(CHANNEL, tr("Руки PhoneXR"), NotificationManager.IMPORTANCE_LOW)
+                NotificationChannel(CHANNEL, "Latitude Hands", NotificationManager.IMPORTANCE_LOW)
             )
         }
     }
 
     private fun trackingNotification() = NotificationCompat.Builder(this, CHANNEL)
         .setSmallIcon(android.R.drawable.ic_menu_camera)
-        .setContentTitle(tr("Отслеживание рук PhoneXR"))
+        .setContentTitle("Latitude Hand Tracking")
         .setContentText(tr("Жесты рук передаются в OpenXR"))
         .setOngoing(true)
         .build()

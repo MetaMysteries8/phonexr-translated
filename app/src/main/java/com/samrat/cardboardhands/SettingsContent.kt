@@ -115,7 +115,7 @@ class SettingsContent(
         when {
             checking -> text(tr("Проверка обновлений…"), 480f, 420f, 36f, Color.rgb(170, 170, 178))
             found == null -> {
-                text("PhoneXR ${Updates.currentVersion(context)}", 1030f, 440f, 44f, Color.WHITE, center = true, bold = true)
+                text("Latitude ${Updates.currentVersion(context)}", 1030f, 440f, 44f, Color.WHITE, center = true, bold = true)
                 text(if (checked) tr("Установлена последняя версия ПО") else "", 1030f, 500f, 34f, Color.rgb(170, 170, 178), center = true)
                 button(RectF(830f, 560f, 1230f, 640f), tr("Проверить снова")) { checkUpdate() }
             }
@@ -125,13 +125,13 @@ class SettingsContent(
                 context.packageManager.getApplicationIcon(context.packageName).let {
                     it.setBounds(510, 370, 630, 490); it.draw(canvas)
                 }
-                text("PhoneXR ${found.version}", 660f, 420f, 44f, Color.WHITE, bold = true)
+                text("Latitude ${found.version}", 660f, 420f, 44f, Color.WHITE, bold = true)
                 text(Updates.formatSize(found.size), 660f, 470f, 32f, Color.rgb(170, 170, 178))
                 val progress = downloadProgress
                 button(RectF(510f, 530f, 1550f, 610f), when {
                     progress == null -> tr("Обновить сейчас")
                     progress < 0f -> tr("Загрузка…")
-                    else -> "Загрузка ${(progress * 100).toInt()}%"
+                    else -> "Downloading ${(progress * 100).toInt()}%"
                 }) {
                     if (downloadProgress == null) {
                         downloadProgress = 0f
@@ -205,10 +205,10 @@ class SettingsContent(
         text(tr("Стиль главного меню"), 480f, 100f, 52f, Color.WHITE, bold = true)
         wrap(tr("Большое меню показывает библиотеку перед вами. Компактная панель остаётся снизу и листается по страницам."), 480f, 170f, 1560f, 34f)
         val selected = Settings.homeStyle(context)
-        button(RectF(480f, 390f, 950f, 500f), if (selected == Settings.HomeStyle.LARGE) "✓ Большое" else tr("Большое")) {
+        button(RectF(480f, 390f, 950f, 500f), (if (selected == Settings.HomeStyle.LARGE) "✓ " else "") + tr("Большое")) {
             Settings.setHomeStyle(context, Settings.HomeStyle.LARGE); host.setHomeStyle(Settings.HomeStyle.LARGE)
         }
-        button(RectF(980f, 390f, 1560f, 500f), if (selected == Settings.HomeStyle.COMPACT) "✓ Компактная панель" else tr("Компактная панель")) {
+        button(RectF(980f, 390f, 1560f, 500f), (if (selected == Settings.HomeStyle.COMPACT) "✓ " else "") + tr("Компактная панель")) {
             Settings.setHomeStyle(context, Settings.HomeStyle.COMPACT); host.setHomeStyle(Settings.HomeStyle.COMPACT)
         }
     }
@@ -228,7 +228,7 @@ class SettingsContent(
         val rows = listOf(
             tr("Устройство") to "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}",
             "Android" to Build.VERSION.RELEASE,
-            "PhoneXR" to (version ?: "—"),
+            "Latitude" to (version ?: "—"),
             tr("Отслеживание") to host.trackingText(),
             tr("Экран") to "${metrics.widthPixels}×${metrics.heightPixels}, ${metrics.widthPixels / 2}×${metrics.heightPixels} ${tr("на глаз")}",
             tr("Поле зрения") to tr("90° по вертикали"),
@@ -248,7 +248,7 @@ class SettingsContent(
     private fun face() {
         text(tr("Лицо"), 480f, 100f, 52f, Color.WHITE, bold = true)
         if (BuildConfig.LITE) {
-            wrap(tr("Persona отключена в Lite. В звонках показывается только имя собеседника."), 480f, 190f, 1560f, 34f)
+            wrap("Persona is unavailable in Latitude Lite.", 480f, 190f, 1560f, 34f)
             return
         }
         val exists = Persona.exists(context)
@@ -316,7 +316,7 @@ class SettingsContent(
         for (i in 1 until rows) canvas.drawRect(x + 30f, y + i * 78f, 1580f, y + i * 78f + 2f, paint)
     }
 
-    private fun button(rect: RectF, label: String, color: Int = Color.rgb(10, 132, 255), action: () -> Unit) {
+    private fun button(rect: RectF, label: String, color: Int = Color.rgb(20, 125, 135), action: () -> Unit) {
         paint.color = color
         canvas.drawRoundRect(rect, rect.height() / 2, rect.height() / 2, paint)
         text(label, rect.centerX(), rect.centerY() + 12f, 34f, Color.WHITE, center = true, bold = true)

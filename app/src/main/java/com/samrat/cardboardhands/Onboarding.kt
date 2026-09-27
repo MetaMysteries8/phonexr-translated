@@ -14,7 +14,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * First start of the headset, like visionOS: "hello" in fifteen languages written in the air, then
+ * First start of the Latitude headset: a short welcome, then
  * the Persona (hands, then a guided face scan), the user's name, the room
  * boundary (6DoF), a pinch calibration, and "Welcome" before the home screen appears.
  */
@@ -188,6 +188,7 @@ class Onboarding(private val context: Context, private val host: Host) {
             Step.WELCOME -> {
                 val hi = Settings.userName(context).takeIf { it.isNotBlank() }
                 written(tr("Добро пожаловать"), t, 150f, HEIGHT / 2f + 20f)
+                text("LATITUDE", WIDTH / 2f, HEIGHT / 2f + 110f, 44f, Color.rgb(164, 241, 231), bold = true)
                 if (hi != null && t > 1f) text(hi, WIDTH / 2f, HEIGHT / 2f + 150f, 64f, Color.argb(((t - 1f).coerceIn(0f, 1f) * 255).toInt(), 255, 255, 255))
                 if (t > 3f) {
                     Settings.setSetupDone(context)
@@ -199,11 +200,10 @@ class Onboarding(private val context: Context, private val host: Host) {
         return true
     }
 
-    /** "hello" in fifteen languages, written in the air one after another, for ever. */
+    /** An original Latitude welcome, visible in the headset before setup. */
     private fun hello(t: Float) {
-        val index = (t / HELLO_SECONDS).toInt() % HELLOS.size
-        val local = t % HELLO_SECONDS
-        written(HELLOS[index], local, 230f, HEIGHT / 2f + 60f, fadeAt = HELLO_SECONDS - .45f)
+        written("Latitude", t, 210f, HEIGHT / 2f + 45f)
+        text("A NEW VIEW FROM HERE", WIDTH / 2f, HEIGHT / 2f + 140f, 40f, Color.rgb(164, 241, 231), bold = true)
     }
 
     /**
@@ -277,17 +277,12 @@ class Onboarding(private val context: Context, private val host: Host) {
         paint.textAlign = Paint.Align.LEFT
     }
 
-    private val keyboardRect = RectF(40f, 470f, WIDTH - 40f, 470f + (WIDTH - 80f) * KeyboardPanel.HEIGHT / KeyboardPanel.WIDTH)
+    private val keyboardRect = RectF(40f, 425f, WIDTH - 40f, 425f + (WIDTH - 80f) * KeyboardPanel.HEIGHT / KeyboardPanel.WIDTH)
 
     companion object {
         const val WIDTH = 1600
         const val HEIGHT = 1000
         private const val SCAN_MS = 2000L
-        private const val HELLO_SECONDS = 2.6f
-        private val HELLOS = listOf(
-            "hello", "привет", "hola", "bonjour", "hallo", "ciao", "olá", "こんにちは",
-            "你好", "안녕하세요", "merhaba", "cześć", "hej", "नमस्ते", "مرحبا",
-        )
     }
 }
 
