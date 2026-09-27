@@ -231,6 +231,21 @@ object L10n {
 
     /** English coverage for labels that were previously hardcoded in individual screens. */
     private val EN_EXTRA: Map<String, String> = mapOf(
+        "Игры и веб‑приложения берутся из вашего репозитория магазина на GitHub." to "Games and web apps come from your store repository on GitHub.",
+        "Игр пока нет. Добавьте JSON‑файл игры в ваш репозиторий магазина." to "No games yet. Add a game JSON file to your store repository.",
+        "Добавьте игру в ваш репозиторий магазина" to "Add a game to your store repository",
+        "Магазин веб‑приложений" to "Web app store",
+        "В магазине пока нет веб‑приложений" to "No web apps in the store yet",
+        "Приложения" to "Apps",
+        "Люди" to "People",
+        "Окружения" to "Environments",
+        "Здесь будут друзья — войдите в аккаунт в приложении PhoneXR" to "Friends will appear here. Sign in to PhoneXR on your phone.",
+        "Здесь будут доступные фоны PhoneXR" to "Available PhoneXR environments will appear here.",
+        "Bedrock в гостиной с камином" to "Bedrock on a screen in a living room",
+        "Roblox на экране в VR" to "Roblox on a VR screen",
+        "Игра на экране в VR" to "Game on a VR screen",
+        "Общение персонами: голос, лицо и руки" to "Calls with voice, Persona, and hands",
+        "Любые приложения телефона окнами в VR" to "Phone apps in VR windows",
         "Найдено: пол/столы — " to "Found: floor/tables — ",
         ", стены — " to ", walls — ",
         "6DoF недоступен: работает 3DoF" to "6DoF unavailable: using 3DoF",
