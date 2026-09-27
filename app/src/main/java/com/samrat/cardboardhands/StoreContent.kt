@@ -23,7 +23,6 @@ import kotlin.concurrent.thread
 class StoreContent(private val context: Context, private val host: Host) : VrWindow.Content {
     interface Host {
         fun openWebApp(app: WebApps.App)
-        fun openCalls()
         fun install(file: File)
         fun homeChanged()
         fun message(text: String)
@@ -100,7 +99,9 @@ class StoreContent(private val context: Context, private val host: Host) : VrWin
 
     private fun build(games: List<GameStore.Item>, web: List<WebApps.App>) {
         val apps = listOf(
-            Card(tr("Звонки"), tr("Общение персонами: голос, лицо и руки"), { null }, { tr("Открыть") }) { host.openCalls() },
+            Card("Gorilla Tag release archive", "External historical archive · Quest compatibility unverified", { null }, { "GitHub" }) {
+                context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(GameStore.GORILLA_TAG_ARCHIVE)))
+            },
             Card(tr("Android‑приложения"), tr("Любые приложения телефона окнами в VR"), { null },
                 { if (AndroidAppsContent.enabled(context)) tr("Удалить") else tr("Получить") }) {
                 AndroidAppsContent.setEnabled(context, !AndroidAppsContent.enabled(context))

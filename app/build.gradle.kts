@@ -36,14 +36,14 @@ android {
         create("full") {
             dimension = "edition"
             buildConfigField("boolean", "LITE", "false")
-            resValue("string", "app_label", "PhoneXR")
+            resValue("string", "app_label", "PhoneXR Latitude")
         }
         create("lite") {
             dimension = "edition"
             applicationIdSuffix = ".lite"
             versionNameSuffix = "-lite"
             buildConfigField("boolean", "LITE", "true")
-            resValue("string", "app_label", "PhoneXR Lite")
+            resValue("string", "app_label", "Latitude Lite")
         }
     }
 

@@ -21,7 +21,7 @@ class HomePanel {
     enum class Mode { HOME, LIBRARY, STORE, MENU, CUSTOMIZE }
 
     /** The three things the home can show, chosen on the rail to the left of the icons. */
-    enum class Tab { APPS, PEOPLE, ENVIRONMENTS }
+    enum class Tab { APPS, ENVIRONMENTS }
 
     data class Entry(val id: String, val label: String, val icon: Drawable?, val badge: String? = null)
 
@@ -43,7 +43,6 @@ class HomePanel {
     var page = 0
         private set
     private var home = emptyList<Entry>()
-    private var people = emptyList<Entry>()
     private var environments = emptyList<Entry>()
     private var store = emptyList<Entry>()
     private var menu = emptyList<Entry>()
@@ -74,7 +73,6 @@ class HomePanel {
     }
 
     fun setHome(entries: List<Entry>) { home = entries; page = page.coerceAtMost(pages(entries) - 1) }
-    fun setPeople(entries: List<Entry>) { people = entries }
     fun setEnvironments(entries: List<Entry>) { environments = entries }
     fun setStore(entries: List<Entry>) { store = entries }
     fun setMenu(entries: List<Entry>) { menu = entries }
@@ -93,7 +91,6 @@ class HomePanel {
     private fun current() = when (mode) {
         Mode.HOME, Mode.LIBRARY -> when (tab) {
             Tab.APPS -> home
-            Tab.PEOPLE -> people
             Tab.ENVIRONMENTS -> environments
         }
         Mode.STORE -> store
@@ -141,13 +138,11 @@ class HomePanel {
                 drawRail(hovered)
                 canvas.drawText(tr(when (tab) {
                     Tab.APPS -> "Приложения"
-                    Tab.PEOPLE -> "Люди"
                     Tab.ENVIRONMENTS -> "Окружения"
                 }), WIDTH / 2f, 70f, heading)
                 if (list.isEmpty()) {
                     canvas.drawText(
                         tr(when (tab) {
-                            Tab.PEOPLE -> "Здесь будут друзья — войдите в аккаунт в приложении PhoneXR"
                             Tab.ENVIRONMENTS -> "Здесь будут доступные фоны PhoneXR"
                             Tab.APPS -> ""
                         }),
@@ -291,7 +286,7 @@ class HomePanel {
         fill.color = Color.argb(150, 44, 44, 52)
         canvas.drawRoundRect(pill, 84f, 84f, fill)
         Tab.entries.forEachIndexed { index, item ->
-            val y = centreY + (index - 1) * 168f
+            val y = centreY + (index - (Tab.entries.size - 1) / 2f) * 168f
             val target = Target.Rail(item)
             val chosen = item == tab
             if (chosen || target == hovered) {
@@ -307,13 +302,6 @@ class HomePanel {
                         val top = y - 34f + row * 40f
                         canvas.drawRoundRect(RectF(left, top, left + 28f, top + 28f), 9f, 9f, fill)
                     }
-                }
-                Tab.PEOPLE -> {
-                    // Two people, one behind the other.
-                    canvas.drawCircle(RAIL_X - 14f, y - 16f, 17f, fill)
-                    canvas.drawRoundRect(RectF(RAIL_X - 40f, y + 6f, RAIL_X + 12f, y + 38f), 26f, 26f, fill)
-                    canvas.drawCircle(RAIL_X + 22f, y - 12f, 13f, fill)
-                    canvas.drawRoundRect(RectF(RAIL_X + 2f, y + 10f, RAIL_X + 42f, y + 36f), 20f, 20f, fill)
                 }
                 Tab.ENVIRONMENTS -> {
                     // A hill with a sun over it: a place to be in.
@@ -333,7 +321,6 @@ class HomePanel {
             if (target == hovered) {
                 val title = tr(when (item) {
                     Tab.APPS -> "Приложения"
-                    Tab.PEOPLE -> "Люди"
                     Tab.ENVIRONMENTS -> "Окружения"
                 })
                 val hint = RectF(RAIL_X + 86f, y - 39f, RAIL_X + 110f + label.measureText(title), y + 39f)
