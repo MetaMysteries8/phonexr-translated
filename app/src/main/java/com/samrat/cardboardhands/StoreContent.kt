@@ -22,7 +22,6 @@ import kotlin.concurrent.thread
  */
 class StoreContent(private val context: Context, private val host: Host) : VrWindow.Content {
     interface Host {
-        fun openCinema(packageName: String, scene: String)
         fun openWebApp(app: WebApps.App)
         fun openCalls()
         fun install(file: File)
@@ -52,6 +51,7 @@ class StoreContent(private val context: Context, private val host: Host) : VrWin
     private var sections = emptyList<Section>()
     private var page = 0
     private var loading = true
+    private var storeError: String? = null
     private val progress = HashMap<String, Int>()
     private val icons = HashMap<String, Bitmap>()
     private var mods = emptyList<GameStore.Item>()
@@ -61,16 +61,26 @@ class StoreContent(private val context: Context, private val host: Host) : VrWin
             build(emptyList(), emptyList())
             draw()
             onReady()
-            val games = runCatching { GameStore.list() }.getOrDefault(emptyList())
+            refresh()
+        }
+    }
+
+    private fun refresh() {
+            loading = true
+            storeError = null
+            build(emptyList(), emptyList())
+            draw()
+            val result = runCatching { GameStore.list() }
+            val games = result.getOrDefault(emptyList())
             val web = runCatching { WebApps.fromStore() }.getOrDefault(emptyList())
             mods = runCatching { GameStore.mods() }.getOrDefault(emptyList())
+            storeError = result.exceptionOrNull()?.localizedMessage ?: if (result.isFailure) tr("Магазин недоступен") else null
             loading = false
             build(games, web)
             draw()
             for (game in games) {
                 GameStore.icon(game)?.let { icons[game.path] = it; draw() }
             }
-        }
     }
 
     override fun takeBitmap(): Bitmap? = if (fresh) synchronized(this) { fresh = false; bitmap } else null
@@ -86,26 +96,12 @@ class StoreContent(private val context: Context, private val host: Host) : VrWin
 
     override fun release() = Unit
 
-    private fun installed(name: String) = runCatching { context.packageManager.getApplicationInfo(name, 0) }.isSuccess
-
     private fun appIcon(name: String): Drawable? = runCatching { context.packageManager.getApplicationIcon(name) }.getOrNull()
 
     private fun build(games: List<GameStore.Item>, web: List<WebApps.App>) {
-        val modes = listOf(
-            Triple("Minecraft VR", "com.mojang.minecraftpe", CinemaActivity.SCENE_ROOM) to "Bedrock в гостиной с камином",
-            Triple("Roblox VR", "com.roblox.client", CinemaActivity.SCENE_ROBLOX) to "Roblox на экране в VR",
-            Triple("Brawl Stars VR", "com.supercell.brawlstars", CinemaActivity.SCENE_BRAWL) to "Игра на экране в VR",
-        ).map { (mode, subtitle) ->
-            val (title, name, scene) = mode
-            Card(title, subtitle, { appIcon(name) }, { if (installed(name)) tr("Играть") else tr("Скачать") }) {
-                if (installed(name)) host.openCinema(name, scene)
-                else context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("market://details?id=$name"))
-                    .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
-            }
-        }
         val apps = listOf(
-            Card(tr("Звонки"), "Общение персонами: голос, лицо и руки", { null }, { tr("Открыть") }) { host.openCalls() },
-            Card(tr("Android‑приложения"), "Любые приложения телефона окнами в VR", { null },
+            Card(tr("Звонки"), tr("Общение персонами: голос, лицо и руки"), { null }, { tr("Открыть") }) { host.openCalls() },
+            Card(tr("Android‑приложения"), tr("Любые приложения телефона окнами в VR"), { null },
                 { if (AndroidAppsContent.enabled(context)) tr("Удалить") else tr("Получить") }) {
                 AndroidAppsContent.setEnabled(context, !AndroidAppsContent.enabled(context))
                 host.homeChanged()
@@ -153,9 +149,13 @@ class StoreContent(private val context: Context, private val host: Host) : VrWin
             }
         }
         sections = listOfNotNull(
-            Section(tr("VR‑режимы"), modes),
             Section(tr("Приложения PhoneXR"), apps),
-            Section(if (loading) "Игры · загрузка…" else tr("Игры"), gameCards).takeIf { loading || gameCards.isNotEmpty() },
+            Section(tr("Игры"), if (loading) listOf(
+                Card(tr("Загрузка…"), GameStore.REPOSITORY, { null }, { "…" }) {}
+            ) else if (gameCards.isEmpty()) listOf(
+                Card(if (storeError != null) tr("Магазин недоступен") else tr("Пока пусто"),
+                    storeError ?: tr("Добавьте игру в ваш репозиторий магазина"), { null }, { tr("Обновить") }) { refresh() }
+            ) else gameCards),
             Section(tr("Моды Minecraft"), modCards).takeIf { modCards.isNotEmpty() },
             Section(tr("Веб‑приложения"), webCards).takeIf { webCards.isNotEmpty() },
         )

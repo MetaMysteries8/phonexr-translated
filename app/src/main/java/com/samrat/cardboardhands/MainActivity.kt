@@ -580,7 +580,7 @@ class MainActivity : ComponentActivity() {
                 title = tr("Игры"),
                 footer = when {
                     storeError != null -> storeError
-                    items != null && items.isEmpty() -> GameStore.EMPTY_HINT
+                    items != null && items.isEmpty() -> tr(GameStore.EMPTY_HINT)
                     else -> null
                 }
             ) {
@@ -909,8 +909,8 @@ class MainActivity : ComponentActivity() {
             ) {
                 HigLink("Сделать этот телефон контроллером") { start(ControllerActivity::class.java) }
             }
-            HigSection(title = tr("Магазин"), footer = "Игры берутся из папки «${GameStore.FOLDER}» в Supabase и из файлов .json в корне репозитория PhoneXR на GitHub.") {
-                HigRow(tr("Сервер"), GameStore.URL_BASE.removePrefix("https://"))
+            HigSection(title = tr("Магазин"), footer = tr("Игры и веб‑приложения берутся из вашего репозитория магазина на GitHub.")) {
+                HigRow(tr("Магазин"), GameStore.REPOSITORY)
             }
             HigSection(
                 title = "Линзы и глаза",

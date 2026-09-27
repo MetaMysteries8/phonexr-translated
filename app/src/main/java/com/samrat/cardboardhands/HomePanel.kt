@@ -127,7 +127,10 @@ class HomePanel {
             return
         }
         when (mode) {
-            Mode.STORE -> canvas.drawText("Магазин веб‑приложений", WIDTH / 2f, 70f, heading)
+            Mode.STORE -> {
+                canvas.drawText(tr("Магазин веб‑приложений"), WIDTH / 2f, 70f, heading)
+                if (list.isEmpty()) canvas.drawText(tr("В магазине пока нет веб‑приложений"), WIDTH / 2f, HEIGHT / 2f, label)
+            }
             Mode.MENU -> canvas.drawText(tr("Меню"), WIDTH / 2f, 70f, heading)
             Mode.CUSTOMIZE -> Unit
             Mode.LIBRARY -> {
@@ -136,13 +139,18 @@ class HomePanel {
             }
             Mode.HOME -> {
                 drawRail(hovered)
+                canvas.drawText(tr(when (tab) {
+                    Tab.APPS -> "Приложения"
+                    Tab.PEOPLE -> "Люди"
+                    Tab.ENVIRONMENTS -> "Окружения"
+                }), WIDTH / 2f, 70f, heading)
                 if (list.isEmpty()) {
                     canvas.drawText(
-                        when (tab) {
+                        tr(when (tab) {
                             Tab.PEOPLE -> "Здесь будут друзья — войдите в аккаунт в приложении PhoneXR"
                             Tab.ENVIRONMENTS -> "Здесь будут доступные фоны PhoneXR"
                             Tab.APPS -> ""
-                        },
+                        }),
                         WIDTH / 2f, HEIGHT / 2f, heading
                     )
                 }
@@ -220,7 +228,7 @@ class HomePanel {
                 val target = Target.Page(i)
                 fill.color = if (i == page) Color.WHITE else Color.argb(if (target == hovered) 200 else 110, 255, 255, 255)
                 canvas.drawCircle(x, HEIGHT - 50f, 11f, fill)
-                areas += RectF(x - 22f, HEIGHT - 80f, x + 22f, HEIGHT - 20f) to target
+                areas += RectF(x - 23f, HEIGHT - 90f, x + 23f, HEIGHT - 10f) to target
             }
         }
         if (mode == Mode.LIBRARY) drawLibraryButton(WIDTH / 2f, HEIGHT - 170f, Target.Close, hovered)
@@ -322,6 +330,19 @@ class HomePanel {
                 }
             }
             areas += RectF(RAIL_X - 76f, y - 76f, RAIL_X + 76f, y + 76f) to target
+            if (target == hovered) {
+                val title = tr(when (item) {
+                    Tab.APPS -> "Приложения"
+                    Tab.PEOPLE -> "Люди"
+                    Tab.ENVIRONMENTS -> "Окружения"
+                })
+                val hint = RectF(RAIL_X + 86f, y - 39f, RAIL_X + 110f + label.measureText(title), y + 39f)
+                fill.color = Color.argb(220, 32, 32, 39)
+                canvas.drawRoundRect(hint, 28f, 28f, fill)
+                label.textAlign = Paint.Align.LEFT
+                canvas.drawText(title, hint.left + 13f, y + 11f, label)
+                label.textAlign = Paint.Align.CENTER
+            }
         }
     }
 

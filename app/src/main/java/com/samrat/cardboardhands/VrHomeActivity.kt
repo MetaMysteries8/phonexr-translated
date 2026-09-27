@@ -318,12 +318,6 @@ class VrHomeActivity : Activity(), LifecycleOwner {
     }
 
     private val storeHost = object : StoreContent.Host {
-        override fun openCinema(packageName: String, scene: String) = runOnUiThread {
-            if (VirtualScreen.access() != VirtualScreen.Access.READY) return@runOnUiThread toast("Запустите Shizuku и разрешите доступ PhoneXR")
-            startActivity(Intent(this@VrHomeActivity, CinemaActivity::class.java)
-                .putExtra(CinemaActivity.EXTRA_PACKAGE, packageName).putExtra(CinemaActivity.EXTRA_SCENE, scene))
-        }
-
         override fun openWebApp(app: WebApps.App) = runOnUiThread {
             openWindow("web:${app.url}", app.name, "web:${app.url}") { BrowserContent(app.url, ::openWebXr) }
         }
