@@ -365,10 +365,10 @@ class VrHomeActivity : Activity(), LifecycleOwner {
         override fun trackingText(): String {
             val tracker = ar
             return when {
-                tracker == null && !Settings.load(this@VrHomeActivity).sixDof -> "3DoF · 6DoF выключен в настройках"
-                tracker == null -> "3DoF · нет ARCore (Google Play Services for AR)"
-                tracker.tracking -> "6DoF · ARCore, комната отслеживается"
-                else -> "6DoF · ARCore ищет комнату…"
+                tracker == null && !Settings.load(this@VrHomeActivity).sixDof -> tr("3DoF · 6DoF выключен в настройках")
+                tracker == null -> tr("3DoF · нет ARCore (Google Play Services for AR)")
+                tracker.tracking -> tr("6DoF · ARCore, комната отслеживается")
+                else -> tr("6DoF · ARCore ищет комнату…")
             }
         }
 
@@ -390,9 +390,9 @@ class VrHomeActivity : Activity(), LifecycleOwner {
         }
 
         override fun boundaryText(): String = when {
-            ar == null -> "Нужен 6DoF (ARCore): без него граница не работает"
-            boundary.defined -> "Граница задана"
-            else -> "Граница не задана"
+            ar == null -> tr("Нужен 6DoF (ARCore): без него граница не работает")
+            boundary.defined -> tr("Граница задана")
+            else -> tr("Граница не задана")
         }
 
         override fun startRoomScan() = runOnUiThread {
@@ -403,14 +403,14 @@ class VrHomeActivity : Activity(), LifecycleOwner {
         }
 
         override fun roomText(): String {
-            val tracker = ar ?: return "Комната недоступна"
-            return if (!tracker.tracking) "Камера ищет окружение…"
-            else "Найдено: пол/столы — ${tracker.horizontalPlanes}, стены — ${tracker.verticalPlanes}"
+            val tracker = ar ?: return tr("Комната недоступна")
+            return if (!tracker.tracking) tr("Камера ищет окружение…")
+            else "${tr("Найдено: пол/столы — ")}${tracker.horizontalPlanes}${tr(", стены — ")}${tracker.verticalPlanes}"
         }
 
         override fun openSystemSettings() = runOnUiThread {
             if (VirtualScreen.access() != VirtualScreen.Access.READY) return@runOnUiThread toast("Сначала запустите Shizuku")
-            openWindow("android-settings", "Wi‑Fi и Bluetooth", ID_SETTINGS) {
+            openWindow("android-settings", tr("Wi‑Fi и Bluetooth"), ID_SETTINGS) {
                 ShizukuAppContent(this@VrHomeActivity, "com.android.settings") { toast(it) }
             }
         }
@@ -424,9 +424,9 @@ class VrHomeActivity : Activity(), LifecycleOwner {
         }
 
         override fun shizukuText(): String = when (VirtualScreen.access()) {
-            VirtualScreen.Access.READY -> "Подключён"
-            VirtualScreen.Access.NEEDS_PERMISSION -> "Нужно разрешение"
-            VirtualScreen.Access.NOT_RUNNING -> "Не запущен"
+            VirtualScreen.Access.READY -> tr("Подключён")
+            VirtualScreen.Access.NEEDS_PERMISSION -> tr("Нужно разрешение")
+            VirtualScreen.Access.NOT_RUNNING -> tr("Не запущен")
         }
 
         override fun setHomeStyle(style: Settings.HomeStyle) = runOnUiThread {
@@ -465,21 +465,19 @@ class VrHomeActivity : Activity(), LifecycleOwner {
                 }
             games = found.associateBy { it.packageName }
             // Minecraft stays in the PhoneXR app (PXR Bedrock), not on the MR home screen.
-            // PhoneXR icons (light or dark, chosen with a long pinch on the home) where the pack has one.
-            fun own(id: String, drawn: () -> Drawable) = IconPack.OWN[id]?.let { IconPack.icon(this, it) } ?: drawn()
             val own = listOf(
-                HomePanel.Entry(ID_BROWSER, tr("Браузер"), own(ID_BROWSER) { drawBrowserIcon() }),
-                HomePanel.Entry(ID_PHOTOS, tr("Фото"), own(ID_PHOTOS) { drawPhotosIcon() }),
-                HomePanel.Entry(ID_SETTINGS, tr("Настройки"), own(ID_SETTINGS) { symbolIcon("⚙", Color.rgb(142, 142, 147)) }),
-                HomePanel.Entry(ID_STORE, tr("Магазин"), own(ID_STORE) { drawStoreIcon() }),
-                HomePanel.Entry(ID_CALLS, tr("Звонки"), own(ID_CALLS) { symbolIcon("✆", Color.rgb(48, 209, 88)) }),
-                HomePanel.Entry(ID_DESKTOP, tr("Компьютер"), own(ID_DESKTOP) { symbolIcon("▣", Color.rgb(10, 132, 255)) }),
-                HomePanel.Entry(ID_LEOS, "LeOS", own(ID_LEOS) { symbolIcon("L", Color.rgb(88, 86, 214)) }),
+                HomePanel.Entry(ID_BROWSER, tr("Браузер"), drawBrowserIcon()),
+                HomePanel.Entry(ID_PHOTOS, tr("Фото"), drawPhotosIcon()),
+                HomePanel.Entry(ID_SETTINGS, tr("Настройки"), symbolIcon("⚙", Color.rgb(142, 142, 147))),
+                HomePanel.Entry(ID_STORE, tr("Магазин"), drawStoreIcon()),
+                HomePanel.Entry(ID_CALLS, tr("Звонки"), symbolIcon("✆", Color.rgb(48, 209, 88))),
+                HomePanel.Entry(ID_DESKTOP, tr("Компьютер"), symbolIcon("▣", Color.rgb(10, 132, 255))),
+                HomePanel.Entry(ID_LEOS, "LeOS", symbolIcon("L", Color.rgb(88, 86, 214))),
             ) + (if (BuildConfig.LITE) emptyList() else listOf(HomePanel.Entry(ID_ELIX, "Elix", drawElixIcon()))) +
-                if (BuildConfig.LITE || AndroidAppsContent.enabled(this)) listOf(HomePanel.Entry(ID_ANDROID, "Android", own(ID_ANDROID) { symbolIcon("▦", Color.rgb(61, 220, 132)) })) else emptyList()
+                if (BuildConfig.LITE || AndroidAppsContent.enabled(this)) listOf(HomePanel.Entry(ID_ANDROID, "Android", symbolIcon("▦", Color.rgb(61, 220, 132)))) else emptyList()
             val vr = found.map {
                 HomePanel.Entry("app:${it.packageName}", it.label,
-                    IconPack.icon(this, it.packageName) ?: runCatching { packageManager.getApplicationIcon(it.packageName) }.getOrNull())
+                    runCatching { packageManager.getApplicationIcon(it.packageName) }.getOrNull())
             }
             val web = WebApps.installed(this).map { app ->
                 HomePanel.Entry("web:${app.url}", app.name, WebApps.icon(app)?.let { BitmapDrawable(resources, it) } ?: letterIcon(app.name))
@@ -1243,8 +1241,8 @@ class VrHomeActivity : Activity(), LifecycleOwner {
     private fun openCustomize() {
         synchronized(panel) {
             panel.setCustomize(
-                IconPack.icon(this, "com.miui.weather2", IconPack.Theme.LIGHT),
-                IconPack.icon(this, "com.miui.weather2", IconPack.Theme.DARK),
+                symbolIcon("☀", Color.rgb(255, 181, 55)),
+                symbolIcon("☾", Color.rgb(88, 86, 214)),
                 IconPack.theme(this) == IconPack.Theme.DARK,
             )
             panel.mode = HomePanel.Mode.CUSTOMIZE
@@ -1421,7 +1419,7 @@ class VrHomeActivity : Activity(), LifecycleOwner {
         return BitmapDrawable(resources, bitmap)
     }
 
-    private fun toast(text: String) = runOnUiThread { Toast.makeText(this, text, Toast.LENGTH_LONG).show() }
+    private fun toast(text: String) = runOnUiThread { Toast.makeText(this, tr(text), Toast.LENGTH_LONG).show() }
 
     // ------------------------------------------------------------------ Rendering
 
@@ -1577,8 +1575,8 @@ class VrHomeActivity : Activity(), LifecycleOwner {
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, onboardingTexture)
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR)
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
-            warningTexture = bannerTexture("Вы вышли за границу — вернитесь назад", Color.rgb(255, 69, 58))
-            tracingTexture = bannerTexture("Закончить сканирование · щипок", Color.rgb(10, 132, 255))
+            warningTexture = bannerTexture(tr("Вы вышли за границу — вернитесь назад"), Color.rgb(255, 69, 58))
+            tracingTexture = bannerTexture(tr("Закончить сканирование · щипок"), Color.rgb(10, 132, 255))
             redraw.set(true)
         }
 
@@ -2201,9 +2199,9 @@ class VrHomeActivity : Activity(), LifecycleOwner {
             paint.color = Color.rgb(75, 75, 82)
             canvas.drawRect(299f, 18f, 301f, 102f, paint); canvas.drawRect(599f, 18f, 601f, 102f, paint)
             paint.color = Color.WHITE; paint.textAlign = Paint.Align.CENTER; paint.textSize = 54f
-            canvas.drawText("− ширина", 150f, 78f, paint)
-            canvas.drawText("+ ширина", 450f, 78f, paint)
-            canvas.drawText("изгиб 360°", 750f, 78f, paint)
+            canvas.drawText(tr("− ширина"), 150f, 78f, paint)
+            canvas.drawText(tr("+ ширина"), 450f, 78f, paint)
+            canvas.drawText(tr("изгиб 360°"), 750f, 78f, paint)
             return bitmap
         }
 

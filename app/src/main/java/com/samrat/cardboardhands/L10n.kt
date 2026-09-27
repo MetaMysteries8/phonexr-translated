@@ -1,6 +1,7 @@
 package com.samrat.cardboardhands
 
 import android.content.Context
+import android.content.Intent
 import java.util.Locale
 
 /**
@@ -8,6 +9,8 @@ import java.util.Locale
  * for a Russian source string (untranslated strings stay Russian).
  */
 object L10n {
+    const val ACTION_CHANGED = "com.samrat.cardboardhands.LANGUAGE_CHANGED"
+    private const val EXTRA_LANG = "lang"
     enum class Lang(val code: String, val title: String, val speech: String) {
         RU("ru", "Русский", "ru-RU"),
         EN("en", "English", "en-US"),
@@ -31,8 +34,15 @@ object L10n {
     }
 
     fun set(context: Context, lang: Lang) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString("lang", lang.name).apply()
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(EXTRA_LANG, lang.name).apply()
         current = lang
+        context.sendBroadcast(Intent(ACTION_CHANGED).setPackage(context.packageName).putExtra(EXTRA_LANG, lang.name))
+    }
+
+    /** Apply the selected language in a different app process without relying on preferences cache timing. */
+    fun applyChange(intent: Intent) {
+        val name = intent.getStringExtra(EXTRA_LANG) ?: return
+        current = runCatching { Lang.valueOf(name) }.getOrDefault(current)
     }
 
     fun tr(ru: String): String {
@@ -43,6 +53,13 @@ object L10n {
     /** Russian → English, Portuguese (Brazil), Portuguese (Portugal). */
     private val DICT: Map<String, Array<String>> = mapOf(
         "Назад" to arrayOf("Back", "Voltar", "Voltar"),
+        "Отслеживание рук PhoneXR" to arrayOf("PhoneXR Hand Tracking", "Rastreamento de mãos PhoneXR", "Rastreio de mãos PhoneXR"),
+        "Жесты рук передаются в OpenXR" to arrayOf("Hand gestures are sent to OpenXR", "Gestos das mãos são enviados ao OpenXR", "Gestos das mãos são enviados ao OpenXR"),
+        "Руки PhoneXR" to arrayOf("PhoneXR Hands", "Mãos PhoneXR", "Mãos PhoneXR"),
+        "Не удалось открыть фото" to arrayOf("Could not open photo", "Não foi possível abrir a foto", "Não foi possível abrir a fotografia"),
+        "Видео не открылось" to arrayOf("Could not open video", "Não foi possível abrir o vídeo", "Não foi possível abrir o vídeo"),
+        "Opendream Services нет в этой сборке PhoneXR" to arrayOf("Opendream Services is not included in this PhoneXR build", "Opendream Services não está incluído nesta versão do PhoneXR", "Opendream Services não está incluído nesta versão do PhoneXR"),
+        "Разрешите PhoneXR устанавливать приложения и повторите" to arrayOf("Allow PhoneXR to install apps and try again", "Permita que o PhoneXR instale apps e tente novamente", "Permita que o PhoneXR instale aplicações e tente novamente"),
         "Библиотека" to arrayOf("Library", "Biblioteca", "Biblioteca"),
         "Видео" to arrayOf("Videos", "Vídeos", "Vídeos"),
         "Компьютер" to arrayOf("Computer", "Computador", "Computador"),
@@ -214,6 +231,54 @@ object L10n {
 
     /** English coverage for labels that were previously hardcoded in individual screens. */
     private val EN_EXTRA: Map<String, String> = mapOf(
+        "Найдено: пол/столы — " to "Found: floor/tables — ",
+        ", стены — " to ", walls — ",
+        "6DoF недоступен: работает 3DoF" to "6DoF unavailable: using 3DoF",
+        "Разрешите PhoneXR доступ к камере" to "Allow PhoneXR to use the camera",
+        "6DoF включён: можно ходить по комнате" to "6DoF enabled: room movement is available",
+        "Запустите Shizuku и разрешите доступ PhoneXR" to "Start Shizuku and allow PhoneXR access",
+        "Для внутренней установки запустите Shizuku и разрешите PhoneXR" to "For internal installation, start Shizuku and allow PhoneXR",
+        "Не удалось подготовить игру" to "Could not prepare the game",
+        "Игра добавлена в PhoneXR" to "Game added to PhoneXR",
+        "3DoF · 6DoF выключен в настройках" to "3DoF · 6DoF is off in settings",
+        "3DoF · нет ARCore (Google Play Services for AR)" to "3DoF · ARCore is unavailable (Google Play Services for AR)",
+        "6DoF · ARCore, комната отслеживается" to "6DoF · ARCore is tracking the room",
+        "6DoF · ARCore ищет комнату…" to "6DoF · ARCore is scanning the room…",
+        "Сначала соберите лицо в приложении PhoneXR" to "Set up your Persona in PhoneXR first",
+        "Persona недоступна в Lite" to "Persona is unavailable in Lite",
+        "Граница удалена" to "Boundary cleared",
+        "Нужен 6DoF (ARCore): без него граница не работает" to "Boundary requires 6DoF (ARCore)",
+        "Граница задана" to "Boundary set",
+        "Граница не задана" to "Boundary not set",
+        "Сканирование комнаты работает только в 6DoF" to "Room scanning requires 6DoF",
+        "Медленно осмотрите пол, стены и столы — найденные поверхности появятся автоматически" to "Slowly scan the floor, walls, and tables; detected surfaces appear automatically",
+        "Комната недоступна" to "Room unavailable",
+        "Камера ищет окружение…" to "Camera is scanning the surroundings…",
+        "Сначала запустите Shizuku" to "Start Shizuku first",
+        "Wi‑Fi и Bluetooth" to "Wi-Fi and Bluetooth",
+        "Shizuku уже подключён" to "Shizuku is already connected",
+        "Запустите Shizuku на телефоне, затем вернитесь в VR" to "Start Shizuku on the phone, then return to VR",
+        "Нужно разрешение" to "Permission required",
+        "Не запущен" to "Not running",
+        "Граница работает только в 6DoF (нужен ARCore)" to "Boundary requires 6DoF (ARCore)",
+        "Обойдите край свободного места. Круг замкнётся сам, щипок — готово" to "Walk around the edge of your free space. The loop closes automatically; pinch to finish",
+        "Установите Minecraft из Google Play" to "Install Minecraft from Google Play",
+        "Elix есть только в полной версии PhoneXR" to "Elix is available only in the full version of PhoneXR",
+        "Для WebXR установите «Браузер PhoneXR» с сайта или из магазина" to "Install PhoneXR Browser from the website or store to use WebXR",
+        "Не удалось открыть WebXR" to "Could not open WebXR",
+        "Камера ещё не готова" to "Camera is not ready yet",
+        "Фото сохранено в «Фото»" to "Photo saved to Photos",
+        "Не удалось сохранить фото" to "Could not save photo",
+        "Для Daydream нужны VR Services — ставлю Opendream Services" to "Daydream requires VR Services; installing Opendream Services",
+        "Камера занята другим приложением" to "Camera is in use by another app",
+        "Граница сохранена" to "Boundary saved",
+        "Граница слишком маленькая — обойдите комнату" to "Boundary is too small; walk around the room",
+        "Экран плоский" to "Screen is flat",
+        "Вы вышли за границу — вернитесь назад" to "You left the boundary; move back inside",
+        "Закончить сканирование · щипок" to "Finish scanning · pinch",
+        "− ширина" to "− width",
+        "+ ширина" to "+ width",
+        "изгиб 360°" to "360° curve",
         "Обычный геймпад даёт кнопки и стики, но не сообщает своё положение. Без метки руки остаются перед вами." to "A standard gamepad supplies buttons and sticks, but no position. Without a marker, the hands stay in front of you.",
         "Выключено" to "Off",
         "Использовать обычное отслеживание рук" to "Use normal hand tracking",

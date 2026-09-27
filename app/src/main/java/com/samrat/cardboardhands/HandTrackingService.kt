@@ -53,20 +53,22 @@ class HandTrackingService : LifecycleService() {
     private val settingsReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) = applySettings()
     }
+    private val languageReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            L10n.applyChange(intent)
+            createNotificationChannel()
+            runCatching { getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, trackingNotification()) }
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
+        L10n.init(this)
         createNotificationChannel()
-        val notification = NotificationCompat.Builder(this, CHANNEL)
-            .setSmallIcon(android.R.drawable.ic_menu_camera)
-            .setContentTitle("PhoneXR Hand Tracking")
-            .setContentText("Жесты рук передаются в OpenXR")
-            .setOngoing(true)
-            .build()
         ServiceCompat.startForeground(
             this,
             NOTIFICATION_ID,
-            notification,
+            trackingNotification(),
             if (Build.VERSION.SDK_INT >= 30) ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA else 0
         )
         applySettings()
@@ -74,6 +76,12 @@ class HandTrackingService : LifecycleService() {
             this,
             settingsReceiver,
             IntentFilter(Settings.ACTION_APPLY),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        ContextCompat.registerReceiver(
+            this,
+            languageReceiver,
+            IntentFilter(L10n.ACTION_CHANGED),
             ContextCompat.RECEIVER_NOT_EXPORTED
         )
         joyCons = JoyConTracker(this)
@@ -384,6 +392,7 @@ class HandTrackingService : LifecycleService() {
 
     override fun onDestroy() {
         unregisterReceiver(settingsReceiver)
+        unregisterReceiver(languageReceiver)
         tracker?.close()
         joyCons?.close()
         cameraExecutor.shutdownNow()
@@ -396,10 +405,17 @@ class HandTrackingService : LifecycleService() {
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= 26) {
             getSystemService(NotificationManager::class.java).createNotificationChannel(
-                NotificationChannel(CHANNEL, "PhoneXR Hands", NotificationManager.IMPORTANCE_LOW)
+                NotificationChannel(CHANNEL, tr("Руки PhoneXR"), NotificationManager.IMPORTANCE_LOW)
             )
         }
     }
+
+    private fun trackingNotification() = NotificationCompat.Builder(this, CHANNEL)
+        .setSmallIcon(android.R.drawable.ic_menu_camera)
+        .setContentTitle(tr("Отслеживание рук PhoneXR"))
+        .setContentText(tr("Жесты рук передаются в OpenXR"))
+        .setOngoing(true)
+        .build()
 
     private data class HandState(
         val present: Boolean = false,
