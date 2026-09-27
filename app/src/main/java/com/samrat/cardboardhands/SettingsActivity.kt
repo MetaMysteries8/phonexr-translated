@@ -95,6 +95,24 @@ class SettingsActivity : ComponentActivity() {
             }
 
             HigSection(
+                title = "FakeXR",
+                footer = tr("Обычный геймпад даёт кнопки и стики, но не сообщает своё положение. Без метки руки остаются перед вами.")
+            ) {
+                HigChoice(tr("Выключено"), tr("Использовать обычное отслеживание рук"), state.fakeXrMode == Settings.FakeXrMode.OFF) {
+                    update(state.copy(fakeXrMode = Settings.FakeXrMode.OFF))
+                }
+                HigChoice(tr("Стики двигают руки"), tr("Левый и правый стики перемещают виртуальные руки"), state.fakeXrMode == Settings.FakeXrMode.STICK_HANDS) {
+                    update(state.copy(fakeXrMode = Settings.FakeXrMode.STICK_HANDS))
+                }
+                HigChoice(tr("Стики для движения"), tr("Руки остаются рядом, стики передаются VR‑игре"), state.fakeXrMode == Settings.FakeXrMode.LOCOMOTION) {
+                    update(state.copy(fakeXrMode = Settings.FakeXrMode.LOCOMOTION))
+                }
+                if (!BuildConfig.LITE) HigSwitchRow(tr("Отслеживать метку 0"), state.fakeXrMarker) {
+                    update(state.copy(fakeXrMarker = it))
+                }
+            }
+
+            HigSection(
                 title = "Joy‑Con",
                 footer = if (interceptEnabled) tr("Нажмите кнопку на Joy‑Con — она подсветится на схеме. ") +
                     tr("Нажмите на кнопку на схеме, чтобы назначить ей действие.")

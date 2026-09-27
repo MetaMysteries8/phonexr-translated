@@ -17,8 +17,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Build Full debug APK
-        run: ./gradlew :app:assembleFullDebug --no-daemon
+      - name: Test and build Full debug APK
+        run: ./gradlew :app:testFullDebugUnitTest :app:assembleFullDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
           name: phonexr-full-debug

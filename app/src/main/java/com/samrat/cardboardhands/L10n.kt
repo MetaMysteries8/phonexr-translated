@@ -214,6 +214,14 @@ object L10n {
 
     /** English coverage for labels that were previously hardcoded in individual screens. */
     private val EN_EXTRA: Map<String, String> = mapOf(
+        "Обычный геймпад даёт кнопки и стики, но не сообщает своё положение. Без метки руки остаются перед вами." to "A standard gamepad supplies buttons and sticks, but no position. Without a marker, the hands stay in front of you.",
+        "Выключено" to "Off",
+        "Использовать обычное отслеживание рук" to "Use normal hand tracking",
+        "Стики двигают руки" to "Sticks move hands",
+        "Левый и правый стики перемещают виртуальные руки" to "Move virtual hands with the left and right sticks",
+        "Стики для движения" to "Sticks for movement",
+        "Руки остаются рядом, стики передаются VR‑игре" to "Keep hands together and pass sticks to the VR game",
+        "Отслеживать метку 0" to "Track marker 0 on the gamepad",
         "Нажмите на игру, чтобы включить трекинг и запустить её. " to "Tap a game to start tracking and launch it. ",
         "Игры Gear VR и сборки для гарнитур сначала нужно пропатчить: PhoneXR откроет им рантайм " to "Gear VR games and headset builds need patching first: PhoneXR assigns its runtime, ",
         "PhoneXR, впишет новый трекинг и оптимизирует их под телефон." to "adds new tracking, and optimizes them for the phone.",

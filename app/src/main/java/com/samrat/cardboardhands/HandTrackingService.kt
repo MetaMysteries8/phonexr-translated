@@ -122,7 +122,7 @@ class HandTrackingService : LifecycleService() {
                         val rotation = image.imageInfo.rotationDegrees
                         trackingExecutor.execute {
                             try {
-                                if (settings.markerJoyCons) findMarkers(frame.rotate(rotation))
+                                if (settings.markerJoyCons || (settings.fakeXrMode != Settings.FakeXrMode.OFF && settings.fakeXrMarker && JoyConButtons.hasConventionalGamepad())) findMarkers(frame.rotate(rotation))
                                 else if (settings.cameraJoyCons) findJoyCons(frame.rotate(rotation))
                                 else tracker?.detect(frame, timestamp, rotation)
                             }
@@ -287,7 +287,22 @@ class HandTrackingService : LifecycleService() {
         var rightJoy = joyCons?.pose(false) ?: JoyConTracker.Pose()
         var left = stableLeft.snapshot(leftJoy.connected)
         var right = stableRight.snapshot(rightJoy.connected)
-        if (current.markerJoyCons) {
+        val fakeXr = current.fakeXrMode != Settings.FakeXrMode.OFF && JoyConButtons.hasConventionalGamepad()
+        var fakePose: FakeXrHands.Result? = null
+        if (fakeXr) {
+            val marker = markerPoses[0].takeIf {
+                current.fakeXrMarker && !BuildConfig.LITE && it.found &&
+                    android.os.SystemClock.elapsedRealtime() - markerSeenAtMs[0] < LOST_MS
+            }
+            val pose = FakeXrHands.map(current.fakeXrMode, JoyConButtons.stick(true), JoyConButtons.stick(false), marker)
+            fakePose = pose
+            left = HandState(present = true, x = pose.left.x, y = pose.left.y, z = pose.left.z)
+            right = HandState(present = true, x = pose.right.x, y = pose.right.y, z = pose.right.z)
+            if (marker != null) {
+                leftJoy = JoyConTracker.Pose(true, marker.qx, marker.qy, marker.qz, marker.qw)
+                rightJoy = leftJoy
+            }
+        } else if (current.markerJoyCons) {
             left = markerHand(0, leftJoy.connected)
             right = markerHand(1, rightJoy.connected)
             markerPoses[0].let { leftJoy = JoyConTracker.Pose(leftJoy.connected, it.qx, it.qy, it.qz, it.qw) }
@@ -307,7 +322,7 @@ class HandTrackingService : LifecycleService() {
         // a real fist grabs (squeeze). With a Joy-Con in hand its buttons do this instead.
         var leftMask = JoyConButtons.mask(true)
         var rightMask = JoyConButtons.mask(false)
-        if (current.handMode == Settings.HandMode.CONTROLLERS && !current.markerJoyCons && !current.cameraJoyCons) {
+        if (!fakeXr && current.handMode == Settings.HandMode.CONTROLLERS && !current.markerJoyCons && !current.cameraJoyCons) {
             if (!leftJoy.connected) {
                 if (left.fist) leftMask = leftMask or JoyConButtons.SQUEEZE
                 left = left.copy(fist = left.pinch)
@@ -317,9 +332,10 @@ class HandTrackingService : LifecycleService() {
                 right = right.copy(fist = right.pinch)
             }
         }
-        val flags = (if (current.sixDof) 1 else 0) or (if (current.handMode == Settings.HandMode.HANDS) 2 else 0)
-        val leftStick = JoyConButtons.stick(left = true)
-        val rightStick = JoyConButtons.stick(left = false)
+        val flags = (if (current.sixDof) 1 else 0) or (if (!fakeXr && current.handMode == Settings.HandMode.HANDS) 2 else 0)
+        val forwardSticks = fakePose?.forwardSticks ?: true
+        val leftStick = if (forwardSticks) JoyConButtons.stick(left = true) else floatArrayOf(0f, 0f)
+        val rightStick = if (forwardSticks) JoyConButtons.stick(left = false) else floatArrayOf(0f, 0f)
         val leftRotation = if (leftJoy.connected) floatArrayOf(leftJoy.x, leftJoy.y, leftJoy.z, leftJoy.w)
             else floatArrayOf(left.qx, left.qy, left.qz, left.qw)
         val rightRotation = if (rightJoy.connected) floatArrayOf(rightJoy.x, rightJoy.y, rightJoy.z, rightJoy.w)
