@@ -72,7 +72,7 @@ object GameStore {
         )
     }
 
-    /** Optional pwa.json or models/*.json in the store repository. */
+    /** Optional pwa.json or model link JSON in the store repository. */
     fun readText(name: String): String {
         require(name.matches(Regex("[A-Za-z0-9_./-]+")) && !name.split('/').contains(".."))
         return openUrl("https://raw.githubusercontent.com/$REPOSITORY/main/$name").use {
