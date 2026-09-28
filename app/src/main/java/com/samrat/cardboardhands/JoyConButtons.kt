@@ -28,18 +28,21 @@ object JoyConButtons {
 
     private val masks = AtomicIntegerArray(2)
     private val rawMasks = AtomicIntegerArray(2)
-    private val sticks = arrayOf(floatArrayOf(0f, 0f), floatArrayOf(0f, 0f))
+    // Motion events and tracking frames arrive on different threads. Publish each axis pair together.
+    @Volatile private var leftStick = floatArrayOf(0f, 0f)
+    @Volatile private var rightStick = floatArrayOf(0f, 0f)
     @Volatile private var bindings: Map<Int, Settings.Action> = Settings.defaults().bindings
     /** While set, key presses are reported here instead of being turned into VR buttons. */
     @Volatile private var learner: ((keyCode: Int, left: Boolean) -> Unit)? = null
 
     fun mask(left: Boolean): Int = masks.get(if (left) 0 else 1)
 
-    fun stick(left: Boolean): FloatArray = sticks[if (left) 0 else 1]
+    fun stick(left: Boolean): FloatArray = if (left) leftStick else rightStick
 
     fun live(left: Boolean): Live {
         val slot = if (left) 0 else 1
-        return Live(connected(left), masks.get(slot), rawMasks.get(slot), sticks[slot][0], sticks[slot][1])
+        val stick = stick(left)
+        return Live(connected(left), masks.get(slot), rawMasks.get(slot), stick[0], stick[1])
     }
 
     fun apply(state: Settings.State) {
@@ -163,9 +166,8 @@ object JoyConButtons {
         }
         // Sideways: the stick's own up is the player's left on the left Joy-Con, right on the right one.
         val turn = if (left) 1f else -1f
-        val slot = sticks[if (left) 0 else 1]
-        slot[0] = deadzone(-rawY * turn)
-        slot[1] = deadzone(rawX * turn)
+        val stick = floatArrayOf(deadzone(-rawY * turn), deadzone(rawX * turn))
+        if (left) leftStick = stick else rightStick = stick
         return true
     }
 
@@ -174,10 +176,15 @@ object JoyConButtons {
      * Many pads (DualShock above all) only report their triggers as axes, so those become presses.
      */
     private fun onGamepadMotion(event: MotionEvent): Boolean {
-        sticks[0][0] = deadzone(event.getAxisValue(MotionEvent.AXIS_X))
-        sticks[0][1] = deadzone(-event.getAxisValue(MotionEvent.AXIS_Y))
-        sticks[1][0] = deadzone(event.getAxisValue(MotionEvent.AXIS_Z))
-        sticks[1][1] = deadzone(-event.getAxisValue(MotionEvent.AXIS_RZ))
+        leftStick = floatArrayOf(
+            deadzone(event.getAxisValue(MotionEvent.AXIS_X)),
+            deadzone(-event.getAxisValue(MotionEvent.AXIS_Y))
+        )
+        val (rightX, rightY) = rightStickAxes { event.device?.getMotionRange(it) != null }
+        rightStick = floatArrayOf(
+            deadzone(event.getAxisValue(rightX)),
+            deadzone(-event.getAxisValue(rightY))
+        )
         trigger(0, event.getAxisValue(MotionEvent.AXIS_LTRIGGER), event.getAxisValue(MotionEvent.AXIS_BRAKE))
         trigger(1, event.getAxisValue(MotionEvent.AXIS_RTRIGGER), event.getAxisValue(MotionEvent.AXIS_GAS))
         return true
@@ -198,11 +205,19 @@ object JoyConButtons {
         return if (kotlin.math.abs(limited) < .12f) 0f else limited
     }
 
+    /** Standard Android pads use Z/RZ; some drivers expose the second stick as RX/RY. */
+    internal fun rightStickAxes(hasAxis: (Int) -> Boolean): Pair<Int, Int> = when {
+        hasAxis(MotionEvent.AXIS_Z) && hasAxis(MotionEvent.AXIS_RZ) -> MotionEvent.AXIS_Z to MotionEvent.AXIS_RZ
+        hasAxis(MotionEvent.AXIS_RX) && hasAxis(MotionEvent.AXIS_RY) -> MotionEvent.AXIS_RX to MotionEvent.AXIS_RY
+        else -> MotionEvent.AXIS_Z to MotionEvent.AXIS_RZ
+    }
+
     fun clear() {
         masks.set(0, 0)
         masks.set(1, 0)
         rawMasks.set(0, 0)
         rawMasks.set(1, 0)
-        sticks.forEach { it[0] = 0f; it[1] = 0f }
+        leftStick = floatArrayOf(0f, 0f)
+        rightStick = floatArrayOf(0f, 0f)
     }
 }
