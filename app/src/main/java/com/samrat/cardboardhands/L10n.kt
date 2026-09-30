@@ -399,7 +399,7 @@ object L10n {
         "OpenXR, Quest и Pico: PhoneXR сам скачает и подготовит APK." to "OpenXR, Quest and Pico: PhoneXR downloads and prepares the APK.",
         "Обычные Minecraft и Roblox на большом экране в VR: своя комната, поворот головы, " to "Play regular Minecraft and Roblox on a large VR screen, with your own room, head rotation, ",
         "игра двумя руками или Joy‑Con. Нажмите на режим — появится инструкция." to "two-handed or Joy‑Con controls. Tap a mode for instructions.",
-        "Android‑приложения: любые приложения телефона окнами в VR (нужен Shizuku). Появляется на главном экране VR." to "Android apps run in VR windows (requires Shizuku). They appear on the VR home screen.",
+        "Android‑приложения: любые приложения телефона окнами в VR (нужен Shizuku). Появляется на главном экране VR." to "Ordinary phone apps run on a flat virtual screen (requires Shizuku). Recognized XR games stay in the Games library and launch through their native VR path.",
         "Открываются в браузере PhoneXR прямо в VR. Добавленные появляются на главном экране VR." to "Open directly in the PhoneXR VR browser. Added apps appear on the VR home screen.",
         "Интерфейс" to "Appearance",
         "Проверка обновлений…" to "Checking for updates…",

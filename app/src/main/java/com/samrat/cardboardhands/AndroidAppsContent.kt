@@ -37,10 +37,16 @@ class AndroidAppsContent(private val context: Context, private val open: (packag
     override fun attach(context: Context, texture: SurfaceTexture?, onReady: () -> Unit) {
         thread {
             val pm = context.packageManager
-            apps = pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
+            // XR titles belong in GameLibrary, where their immersive entrypoint/runtime is used.
+            // Showing them here would make the flat virtual screen an accidental default.
+            val xrPackages = runCatching { GameLibrary.scan(context).map { it.packageName }.toSet() }
+                .getOrDefault(emptySet())
+            val launchers = pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
                 .map { it.activityInfo.packageName to it }
+            val flatPackages = flatPackages(launchers.map { it.first }, xrPackages, context.packageName).toSet()
+            apps = launchers
                 .distinctBy { it.first }
-                .filter { it.first != context.packageName }
+                .filter { it.first in flatPackages }
                 .map { (name, info) -> App(name, info.loadLabel(pm).toString(), runCatching { info.loadIcon(pm) }.getOrNull()) }
                 .sortedBy { it.label.lowercase() }
             draw()
@@ -94,6 +100,10 @@ class AndroidAppsContent(private val context: Context, private val open: (packag
         private const val PER_PAGE = COLUMNS * 3
 
         private const val PREFS = "android_apps"
+
+        /** Keep the virtual-screen shelf for ordinary apps; recognized XR apps launch natively. */
+        internal fun flatPackages(launchers: List<String>, xrPackages: Set<String>, ownPackage: String): List<String> =
+            launchers.distinct().filter { it != ownPackage && it !in xrPackages }
 
         /** The store's "Get" for this PhoneXR app: it then shows on the VR home screen. */
         fun enabled(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean("enabled", false)
