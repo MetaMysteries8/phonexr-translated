@@ -30,7 +30,16 @@ jobs:
           yes | "$sdkmanager" --licenses >/dev/null
           "$sdkmanager" 'platforms;android-35' 'build-tools;35.0.0' 'cmake;3.22.1' 'ndk;27.0.12077973'
           sudo apt-get update
-          sudo apt-get install -y apktool glslang-tools ninja-build
+          sudo apt-get install -y glslang-tools ninja-build
+          curl --fail --location --retry 3 \
+            --output /tmp/apktool.jar \
+            https://github.com/iBotPeaches/Apktool/releases/download/v3.0.3/apktool_3.0.3.jar
+          sudo install -m 0644 /tmp/apktool.jar /usr/local/lib/apktool.jar
+          sudo tee /usr/local/bin/apktool >/dev/null <<'EOF'
+          #!/usr/bin/env sh
+          exec java -jar /usr/local/lib/apktool.jar "$@"
+          EOF
+          sudo chmod 0755 /usr/local/bin/apktool
       - name: Fetch the pinned Monado source
         run: |
           commit="$(tr -d '[:space:]' < openxr-runtime/MONADO_COMMIT)"
