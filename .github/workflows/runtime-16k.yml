@@ -1,0 +1,58 @@
+name: Rebuild 16 KB OpenXR runtime
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/runtime-16k.yml'
+      - 'openxr-runtime/**'
+      - 'app/src/main/assets/runtime/phonexr-runtime.apk'
+      - 'app/src/main/java/com/samrat/cardboardhands/PhoneXrRuntime.kt'
+  workflow_dispatch:
+
+jobs:
+  runtime-16k:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android native toolchain and apktool
+        run: |
+          sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'cmake;3.22.1' 'ndk;27.0.12077973'
+          sudo apt-get update
+          sudo apt-get install -y apktool ninja-build
+      - name: Fetch the pinned Monado source
+        run: |
+          commit="$(tr -d '[:space:]' < openxr-runtime/MONADO_COMMIT)"
+          git clone --filter=blob:none https://gitlab.freedesktop.org/monado/monado.git openxr-runtime/monado
+          git -C openxr-runtime/monado checkout "$commit"
+      - name: Apply Latitude input and 16 KB linker patches
+        run: |
+          git -C openxr-runtime/monado apply ../monado-phonexr.patch
+          git -C openxr-runtime/monado apply ../monado-16k.patch
+      - name: Build Monado for Android
+        working-directory: openxr-runtime/monado
+        run: ./gradlew :src:xrt:targets:openxr_android:assembleOutOfProcessDebug --no-daemon
+      - name: Rebrand, slim, align and sign the runtime
+        run: |
+          runtime="$(find openxr-runtime/monado/src/xrt/targets/openxr_android/build/outputs/apk -type f -iname '*out*process*debug*.apk' -print -quit)"
+          test -n "$runtime"
+          python3 openxr-runtime/check_elf_pages.py "$runtime"
+          python3 openxr-runtime/build_runtime_apk.py --apk "$runtime"
+          python3 openxr-runtime/check_elf_pages.py app/src/main/assets/runtime/phonexr-runtime.apk
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -c -P 16 -v 4 app/src/main/assets/runtime/phonexr-runtime.apk
+      - name: Build Latitude with the rebuilt runtime
+        run: ./gradlew :app:testFullDebugUnitTest :app:assembleFullDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: phonexr-latitude-16k-runtime
+          path: |
+            app/src/main/assets/runtime/phonexr-runtime.apk
+            app/build/outputs/apk/full/debug/app-full-debug.apk
+          if-no-files-found: error
