@@ -383,7 +383,6 @@ class MainActivity : ComponentActivity() {
             when (state) {
                 PhoneXrRuntime.State.READY -> HigRow("PhoneXR Runtime", tr("Установлен"))
                 PhoneXrRuntime.State.OUTDATED -> HigLink(tr("Обновить PhoneXR Runtime")) { PhoneXrRuntime.install(this@MainActivity) }
-                PhoneXrRuntime.State.INCOMPATIBLE_BUNDLE -> HigRow("OpenXR runtime", "16 KB device: bundled native libraries need rebuilding")
                 PhoneXrRuntime.State.MISSING -> if (PhoneXrRuntime.bundled(this@MainActivity)) {
                     HigLink(tr("Установить PhoneXR Runtime")) { PhoneXrRuntime.install(this@MainActivity) }
                 } else {

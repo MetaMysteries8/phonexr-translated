@@ -222,7 +222,6 @@ class SettingsContent(
         val runtime = when (PhoneXrRuntime.state(context)) {
             PhoneXrRuntime.State.READY -> "PhoneXR Runtime"
             PhoneXrRuntime.State.OUTDATED -> tr("PhoneXR Runtime (есть обновление)")
-            PhoneXrRuntime.State.INCOMPATIBLE_BUNDLE -> "16 KB rebuild required"
             PhoneXrRuntime.State.MISSING -> tr("не установлен")
         }
         val rows = listOf(

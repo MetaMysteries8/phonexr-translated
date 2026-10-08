@@ -9,3 +9,10 @@
  	find_library(ANDROID_LIBRARY android)
  	find_library(ANDROID_LOG_LIBRARY log)
  endif()
+--- a/build.gradle
++++ b/build.gradle
+@@ -31,3 +31,3 @@
+         // Google Cardboard QR Code scan
+-        barcodeScannerViewVersion = "1.6.4"
++        barcodeScannerViewVersion = "1.6.5"
+     }
