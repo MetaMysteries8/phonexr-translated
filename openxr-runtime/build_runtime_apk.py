@@ -22,7 +22,7 @@ from check_elf_pages import check
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SDK = os.environ.get("ANDROID_HOME") or os.path.expanduser("~/Library/Android/sdk")
 NAME = "PhoneXR Runtime"
-VERSION_CODE = 3
+VERSION_CODE = 4
 
 
 def build_tool(name):
