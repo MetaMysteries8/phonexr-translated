@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="joycon_service_label">Latitude Controller</string>
-    <string name="joycon_service_description">Передаёт кнопки Joy‑Con в OpenXR-игры как кнопки VR-контроллеров. Читает только нажатия на Joy‑Con, остальные клавиши не трогает.</string>
+    <string name="joycon_service_description">Maps controller button presses to VR controller buttons in OpenXR games. It only reads controller input and does not intercept other keys.</string>
 </resources>

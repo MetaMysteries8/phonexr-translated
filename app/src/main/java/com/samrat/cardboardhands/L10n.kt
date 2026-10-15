@@ -432,6 +432,7 @@ object L10n {
         "Гироскоп доступен у" to "Gyro available on", "поворот руки работает без камеры" to "hand rotation works without the camera",
         "вперёд" to "forward", "вбок" to "sideways", "Кнопка" to "Button", "на глаз" to "per eye", "мм" to "mm",
         "Установлен" to "Installed", "Подключён" to "Connected", "не установлен" to "not installed",
+        "пробел" to "space",
     )
 }
 

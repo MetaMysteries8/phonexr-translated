@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="joycon_service_label">Latitude Controller</string>
+    <string name="joycon_service_description">Передаёт нажатия контроллера в OpenXR-игры как кнопки VR-контроллеров. Читает только ввод контроллера, остальные клавиши не перехватывает.</string>
+</resources>
