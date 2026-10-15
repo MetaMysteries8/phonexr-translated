@@ -32,13 +32,15 @@ class CriticalEnglishCoverageTest {
         }.toSet()
 
         val missing = translatedLabels.filterNot(englishKeys::contains).sorted()
-        assertTrue(missing.isEmpty(), "Missing English translations: $missing")
+        assertTrue("Missing English translations: $missing", missing.isEmpty())
     }
 
     @Test
     fun defaultAndroidServiceStringsAreEnglish() {
         val defaultStrings = File(repoRoot, "app/src/main/res/values/strings.xml").readText()
-        assertTrue(!Regex("[А-Яа-яЁё]").containsMatchIn(defaultStrings),
-            "Default Android resources must not fall back to Russian")
+        assertTrue(
+            "Default Android resources must not fall back to Russian",
+            !Regex("[А-Яа-яЁё]").containsMatchIn(defaultStrings),
+        )
     }
 }
