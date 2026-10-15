@@ -1,8 +1,8 @@
 package com.samrat.cardboardhands
 
 import java.io.File
-import kotlin.test.Test
-import kotlin.test.assertTrue
+import org.junit.Assert.assertTrue
+import org.junit.Test
 
 class CriticalEnglishCoverageTest {
     private val repoRoot: File by lazy {
