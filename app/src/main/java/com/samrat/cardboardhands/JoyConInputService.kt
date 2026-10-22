@@ -3,8 +3,10 @@ package com.samrat.cardboardhands
 import android.accessibilityservice.AccessibilityService
 import android.content.Context
 import android.content.Intent
+import android.hardware.input.InputManager
 import android.os.Build
 import android.provider.Settings as AndroidSettings
+import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.accessibility.AccessibilityEvent
@@ -20,6 +22,17 @@ class JoyConInputService : AccessibilityService() {
     private var passthroughReceiver: android.content.BroadcastReceiver? = null
     /** Flags as configured, restored when the cinema stops passing Joy-Con input to its game. */
     private var normalFlags = 0
+    private var inputManager: InputManager? = null
+    private val connectionGuard = ControllerConnectionGuard()
+    private val inputDeviceListener = object : InputManager.InputDeviceListener {
+        override fun onInputDeviceAdded(deviceId: Int) {
+            if (JoyConButtons.isController(InputDevice.getDevice(deviceId))) connectionGuard.add(deviceId)
+        }
+        override fun onInputDeviceRemoved(deviceId: Int) {
+            if (connectionGuard.remove(deviceId)) JoyConButtons.clear()
+        }
+        override fun onInputDeviceChanged(deviceId: Int) = refreshControllerConnections()
+    }
     private val publisher = object : Runnable {
         override fun run() {
             if (!watching) return
@@ -38,6 +51,10 @@ class JoyConInputService : AccessibilityService() {
             }
         }
         JoyConButtons.apply(Settings.load(this))
+        inputManager = getSystemService(InputManager::class.java).also { manager ->
+            connectionGuard.update(controllerIds())
+            manager.registerInputDeviceListener(inputDeviceListener, handler)
+        }
         normalFlags = serviceInfo.flags
         passthroughReceiver = object : android.content.BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -84,10 +101,23 @@ class JoyConInputService : AccessibilityService() {
         passthroughReceiver?.let { unregisterReceiver(it) }
         passthroughReceiver = null
         watchReceiver = null
+        inputManager?.unregisterInputDeviceListener(inputDeviceListener)
+        inputManager = null
         JoyConButtons.learn(null)
         JoyConButtons.clear()
         return super.onUnbind(intent)
     }
+
+    /**
+     * Android does not guarantee key-up or centered-axis events when Bluetooth/USB disappears.
+     * Drop every cached button and stick value as soon as a controller leaves the active set.
+     */
+    private fun refreshControllerConnections() {
+        if (connectionGuard.update(controllerIds())) JoyConButtons.clear()
+    }
+
+    private fun controllerIds(): Set<Int> = InputDevice.getDeviceIds()
+        .filterTo(mutableSetOf()) { id -> JoyConButtons.isController(InputDevice.getDevice(id)) }
 
     companion object {
         /** Sticks need onMotionEvent, added in Android 14. */
