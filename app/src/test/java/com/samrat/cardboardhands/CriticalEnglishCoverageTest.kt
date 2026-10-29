@@ -45,18 +45,17 @@ class CriticalEnglishCoverageTest {
             "HandTrackingService.kt",
             "VrHomeActivity.kt",
         )
-        val cyrillicString = Regex("\"(?:\\\\.|[^\"\\\\])*[А-Яа-яЁё](?:\\\\.|[^\"\\\\])*\"")
+        val cyrillicString = Regex("\\\"[^\\\"]*?[А-Яа-яЁё][^\\\"]*?\\\"")
         val translatedPrefix = Regex("""tr\s*\(\s*$""")
         val hardcoded = criticalFiles.flatMap { name ->
             val source = File(sourceDir, name).readText()
-            cyrillicString.findAll(source).mapNotNull { match ->
-                val prefix = source.substring(maxOf(0, match.range.first - 16), match.range.first)
-                if (translatedPrefix.containsMatchIn(prefix)) null
-                else {
-                    val line = source.take(match.range.first).count { it == '\n' } + 1
-                    "$name:$line ${match.value}"
+            source.lineSequence().mapIndexed { index, line ->
+                cyrillicString.findAll(line).mapNotNull { match ->
+                    val prefix = line.substring(maxOf(0, match.range.first - 16), match.range.first)
+                    if (translatedPrefix.containsMatchIn(prefix)) null
+                    else "$name:${index + 1} ${match.value}"
                 }
-            }.toList()
+            }.flatten().toList()
         }
 
         assertTrue("Hard-coded Cyrillic UI literals: $hardcoded", hardcoded.isEmpty())
