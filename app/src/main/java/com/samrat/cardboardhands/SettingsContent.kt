@@ -40,7 +40,7 @@ class SettingsContent(
     }
 
     private enum class Page(val title: String) {
-        ABOUT(tr("О гарнитуре")), CONNECTIVITY("Wi‑Fi и Bluetooth"), APPEARANCE(tr("Интерфейс")),
+        ABOUT(tr("О гарнитуре")), CONNECTIVITY(tr("Wi‑Fi и Bluetooth")), APPEARANCE(tr("Интерфейс")),
         UPDATE(tr("Обновление ПО")), FACE(tr("Лицо")), ROOM(tr("Сканирование комнаты")), BOUNDARY(tr("Граница"))
     }
 
@@ -190,7 +190,7 @@ class SettingsContent(
     }
 
     private fun connectivity() {
-        text("Wi‑Fi и Bluetooth", 480f, 100f, 52f, Color.WHITE, bold = true)
+        text(tr("Wi‑Fi и Bluetooth"), 480f, 100f, 52f, Color.WHITE, bold = true)
         wrap(tr("Системные сети открываются прямо в отдельном VR‑окне. Для управления Android‑окнами нужен Shizuku."), 480f, 170f, 1560f, 34f)
         card(480f, 330f, 3)
         text("Wi‑Fi", 510f, 380f, 34f, Color.WHITE)

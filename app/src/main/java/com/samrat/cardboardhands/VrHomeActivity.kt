@@ -213,11 +213,11 @@ class VrHomeActivity : Activity(), LifecycleOwner {
         lifecycleRegistry.currentState = Lifecycle.State.RESUMED
         stopService(Intent(this, HandTrackingService::class.java))
         // ARCore owns the camera in 6DoF; if it cannot start, CameraX gives 3DoF passthrough.
-        if (ar?.resume() == false) { ar?.close(); ar = null; toast("6DoF недоступен: работает 3DoF") }
+            if (ar?.resume() == false) { ar?.close(); ar = null; toast(tr("6DoF недоступен: работает 3DoF")) }
         surfaceView.onResume()
         tracker.travelMode = Settings.travelMode(this)
         tracker.start()
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) toast("Разрешите PhoneXR доступ к камере")
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) toast(tr("Разрешите PhoneXR доступ к камере"))
         else if (ar == null) {
             bindCamera()
             if (Settings.load(this).sixDof) startArLater()
@@ -274,7 +274,7 @@ class VrHomeActivity : Activity(), LifecycleOwner {
                 }
                 glTasks += { renderer?.attachAr(created) }
                 ar = created
-                toast("6DoF включён: можно ходить по комнате")
+                toast(tr("6DoF включён: можно ходить по комнате"))
             }
         }
     }
@@ -310,17 +310,17 @@ class VrHomeActivity : Activity(), LifecycleOwner {
 
         override fun install(file: java.io.File) = runOnUiThread {
             if (VirtualScreen.access() != VirtualScreen.Access.READY)
-                return@runOnUiThread toast("Для внутренней установки запустите Shizuku и разрешите PhoneXR")
+            return@runOnUiThread toast(tr("Для внутренней установки запустите Shizuku и разрешите PhoneXR"))
             thread(name = "PhoneXR store prepare") {
                 val apk = runCatching {
                     if (file.extension.equals("pxr", true)) PxrPackage.androidApk(this@VrHomeActivity, android.net.Uri.fromFile(file))
                     else ApkPatcher.patch(this@VrHomeActivity, android.net.Uri.fromFile(file)).apk
-                }.getOrElse { return@thread toast(it.localizedMessage ?: "Не удалось подготовить игру") }
+        }.getOrElse { return@thread toast(it.localizedMessage ?: tr("Не удалось подготовить игру")) }
                 runOnUiThread {
                     InternalInstaller.install(this@VrHomeActivity, apk) { problem ->
                         if (problem != null) toast(problem)
                         else {
-                            toast("Игра добавлена в PhoneXR")
+        toast(tr("Игра добавлена в PhoneXR"))
                             loadApps()
                         }
                     }
@@ -351,12 +351,12 @@ class VrHomeActivity : Activity(), LifecycleOwner {
         }
 
         override fun showPersona() = runOnUiThread {
-            if (!Persona.exists(this@VrHomeActivity)) toast("Сначала соберите лицо в приложении PhoneXR")
+        if (!Persona.exists(this@VrHomeActivity)) toast(tr("Сначала соберите лицо в приложении PhoneXR"))
             else openWindow("persona", tr("Лицо"), ID_PERSONA) { PersonaContent(this@VrHomeActivity) }
         }
 
         override fun scanPersona() = runOnUiThread {
-            if (BuildConfig.LITE) return@runOnUiThread toast("Persona недоступна в Lite")
+        if (BuildConfig.LITE) return@runOnUiThread toast(tr("Persona недоступна в Lite"))
             launchPersonaScanner()
         }
 
@@ -364,7 +364,7 @@ class VrHomeActivity : Activity(), LifecycleOwner {
 
         override fun clearBoundary() {
             boundary.clear()
-            toast("Граница удалена")
+        toast(tr("Граница удалена"))
         }
 
         override fun boundaryText(): String = when {
@@ -374,10 +374,10 @@ class VrHomeActivity : Activity(), LifecycleOwner {
         }
 
         override fun startRoomScan() = runOnUiThread {
-            val tracker = ar ?: return@runOnUiThread toast("Сканирование комнаты работает только в 6DoF")
+        val tracker = ar ?: return@runOnUiThread toast(tr("Сканирование комнаты работает только в 6DoF"))
             tracker.recenter()
             windows.firstOrNull { it.id == "settings" }?.let { minimize(it) }
-            toast("Медленно осмотрите пол, стены и столы — найденные поверхности появятся автоматически")
+        toast(tr("Медленно осмотрите пол, стены и столы — найденные поверхности появятся автоматически"))
         }
 
         override fun roomText(): String {
@@ -387,7 +387,7 @@ class VrHomeActivity : Activity(), LifecycleOwner {
         }
 
         override fun openSystemSettings() = runOnUiThread {
-            if (VirtualScreen.access() != VirtualScreen.Access.READY) return@runOnUiThread toast("Сначала запустите Shizuku")
+        if (VirtualScreen.access() != VirtualScreen.Access.READY) return@runOnUiThread toast(tr("Сначала запустите Shizuku"))
             openWindow("android-settings", tr("Wi‑Fi и Bluetooth"), ID_SETTINGS) {
                 ShizukuAppContent(this@VrHomeActivity, "com.android.settings") { toast(it) }
             }
@@ -395,9 +395,9 @@ class VrHomeActivity : Activity(), LifecycleOwner {
 
         override fun requestShizuku() = runOnUiThread {
             when (VirtualScreen.access()) {
-                VirtualScreen.Access.READY -> toast("Shizuku уже подключён")
+            VirtualScreen.Access.READY -> toast(tr("Shizuku уже подключён"))
                 VirtualScreen.Access.NEEDS_PERMISSION -> VirtualScreen.requestPermission()
-                VirtualScreen.Access.NOT_RUNNING -> toast("Запустите Shizuku на телефоне, затем вернитесь в VR")
+            VirtualScreen.Access.NOT_RUNNING -> toast(tr("Запустите Shizuku на телефоне, затем вернитесь в VR"))
             }
         }
 
@@ -424,11 +424,11 @@ class VrHomeActivity : Activity(), LifecycleOwner {
     }
 
     private fun startBoundaryTracing() {
-        if (ar == null) return toast("Граница работает только в 6DoF (нужен ARCore)")
+        if (ar == null) return toast(tr("Граница работает только в 6DoF (нужен ARCore)"))
         windows.firstOrNull { it.id == "settings" }?.let { minimize(it) }
         switchMode(HomePanel.Mode.HOME)
         boundary.startTracing()
-        toast("Обойдите край свободного места. Круг замкнётся сам, щипок — готово")
+        toast(tr("Обойдите край свободного места. Круг замкнётся сам, щипок — готово"))
     }
 
     // ------------------------------------------------------------------ Apps and windows
@@ -514,7 +514,7 @@ class VrHomeActivity : Activity(), LifecycleOwner {
             id == ID_ANDROID -> openWindow("android", tr("Android‑приложения"), ID_ANDROID) {
                 AndroidAppsContent(this) { name, label ->
                     runOnUiThread {
-                        if (VirtualScreen.access() != VirtualScreen.Access.READY) toast("Запустите Shizuku и разрешите доступ PhoneXR")
+        if (VirtualScreen.access() != VirtualScreen.Access.READY) toast(tr("Запустите Shizuku и разрешите доступ PhoneXR"))
                         else openWindow("app:$name", label, ID_ANDROID) { ShizukuAppContent(this, name) { toast(it) } }
                     }
                 }
@@ -522,7 +522,7 @@ class VrHomeActivity : Activity(), LifecycleOwner {
             id == MENU_BOUNDARY -> startBoundaryTracing()
             id == ID_MINECRAFT -> {
                 if (runCatching { packageManager.getApplicationInfo(MINECRAFT, 0) }.isFailure) {
-                    toast("Установите Minecraft из Google Play")
+        toast(tr("Установите Minecraft из Google Play"))
                 } else {
                     openWindow("minecraft", "Minecraft", ID_MINECRAFT) { ShizukuAppContent(this, MINECRAFT) { toast(it) } }
                 }
@@ -538,7 +538,7 @@ class VrHomeActivity : Activity(), LifecycleOwner {
                     openWindow("web:${app.url}", app.name, "web:${app.url}") { BrowserContent(app.url, ::openWebXr) }
                 } else {
                     WebApps.add(this, app)
-                    toast("«${app.name}» добавлено на главный экран")
+        toast("«${app.name}» ${tr("добавлено на главный экран")}")
                     thread { refreshStore(); loadApps() }
                 }
             }
@@ -619,31 +619,31 @@ class VrHomeActivity : Activity(), LifecycleOwner {
 
     /** A page asked for an immersive WebXR session: the WebView has none, so the PhoneXR browser (OpenXR) takes over. */
     private fun openWebXr(url: String) = runOnUiThread {
-        if (WebApps.browserPackage(this) == null) return@runOnUiThread toast("Для WebXR установите «Браузер PhoneXR» с сайта или из магазина")
+        if (WebApps.browserPackage(this) == null) return@runOnUiThread toast(tr("Для WebXR установите «Браузер PhoneXR» с сайта или из магазина"))
         cameraProvider?.unbindAll()
         ContextCompat.startForegroundService(this, Intent(this, HandTrackingService::class.java))
-        if (!WebApps.open(this, url)) toast("Не удалось открыть WebXR")
+        if (!WebApps.open(this, url)) toast(tr("Не удалось открыть WebXR"))
     }
 
     /** Real photo: the current passthrough frame goes to the gallery (Pictures/PhoneXR). */
     private fun takePhoto() {
         val bitmap = arPhoto?.takeIf { !it.isRecycled }?.let { runCatching { it.copy(Bitmap.Config.ARGB_8888, false) }.getOrNull() }
             ?: synchronized(frameLock) { frame?.takeIf { !it.isRecycled }?.copy(Bitmap.Config.ARGB_8888, false) }
-            ?: return toast("Камера ещё не готова")
+            ?: return toast(tr("Камера ещё не готова"))
         switchMode(HomePanel.Mode.HOME)
         thread(name = "PhoneXR photo") {
             val saved = runCatching { Daydream.savePhoto(this, bitmap) }.isSuccess
             bitmap.recycle()
-            toast(if (saved) "Фото сохранено в «Фото»" else "Не удалось сохранить фото")
+        toast(if (saved) tr("Фото сохранено в «Фото»") else tr("Не удалось сохранить фото"))
             windows.forEach { (it.content as? PhotosContent)?.reload() }
         }
     }
 
     private fun launchGame(packageName: String) {
         val game = games[packageName] ?: return
-        val intent = GameLibrary.launchIntent(this, game) ?: return toast("У «${game.label}» нет экрана запуска")
+        val intent = GameLibrary.launchIntent(this, game) ?: return toast("«${game.label}» ${tr("нет экрана запуска")}")
         if (game.kind == GameLibrary.Kind.DAYDREAM && !Daydream.servicesInstalled(this)) {
-            toast("Для Daydream нужны VR Services — ставлю Opendream Services")
+            toast(tr("Для Daydream нужны VR Services — ставлю Opendream Services"))
             runOnUiThread { Daydream.installServices(this) }
             return
         }
@@ -735,7 +735,7 @@ class VrHomeActivity : Activity(), LifecycleOwner {
             }
             provider.unbindAll()
             runCatching { provider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, analysis) }
-                .onFailure { toast("Камера занята другим приложением") }
+            .onFailure { toast(tr("Камера занята другим приложением")) }
         }, ContextCompat.getMainExecutor(this))
     }
 
@@ -857,7 +857,7 @@ class VrHomeActivity : Activity(), LifecycleOwner {
             if (hand.palmToFace && onboarding == null) {
                 openHandMenu(chosen.first)
             } else if (boundary.tracing != null) {
-                if (boundary.finish()) toast("Граница сохранена") else toast("Граница слишком маленькая — обойдите комнату")
+            if (boundary.finish()) toast(tr("Граница сохранена")) else toast(tr("Граница слишком маленькая — обойдите комнату"))
             } else {
                 press(target, direction)
             }
@@ -1056,7 +1056,8 @@ class VrHomeActivity : Activity(), LifecycleOwner {
             }
             is Hit.DesktopCurve -> {
                 target.window.arcDegrees = when (target.window.arcDegrees.toInt()) { 0 -> 90f; 90 -> 180f; 180 -> 300f; else -> 0f }
-                toast(if (target.window.arcDegrees == 0f) "Экран плоский" else "Изгиб экрана: ${target.window.arcDegrees.toInt()}°")
+        toast(if (target.window.arcDegrees == 0f) tr("Экран плоский")
+            else "${tr("Изгиб экрана:")} ${target.window.arcDegrees.toInt()}°")
             }
             is Hit.Keyboard -> {
                 val key = keyboard.press(target.u, target.v)
@@ -1586,7 +1587,7 @@ class VrHomeActivity : Activity(), LifecycleOwner {
             }
             synchronized(headPosition) { synchronized(tracker6.position) { System.arraycopy(tracker6.position, 0, headPosition, 0, 3) } }
             if (boundary.tracing != null && tracker6.tracking && boundary.addPoint(headPosition[0], headPosition[2])) {
-                toast("Граница сохранена")
+        toast(tr("Граница сохранена"))
             }
         }
 

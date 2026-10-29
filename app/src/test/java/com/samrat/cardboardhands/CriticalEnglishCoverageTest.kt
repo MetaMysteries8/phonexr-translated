@@ -23,6 +23,7 @@ class CriticalEnglishCoverageTest {
             "SettingsContent.kt",
             "HandTrackingService.kt",
             "KeyboardPanel.kt",
+            "VrHomeActivity.kt",
         )
         val translatedLabels = criticalFiles.flatMap { name ->
             Regex("tr\\(\"([^\"]+)\"\\)")
@@ -33,6 +34,32 @@ class CriticalEnglishCoverageTest {
 
         val missing = translatedLabels.filterNot(englishKeys::contains).sorted()
         assertTrue("Missing English translations: $missing", missing.isEmpty())
+    }
+
+    @Test
+    fun settingsAndVrHomeDoNotDrawHardcodedCyrillic() {
+        val sourceDir = File(repoRoot, "app/src/main/java/com/samrat/cardboardhands")
+        val criticalFiles = listOf(
+            "SettingsActivity.kt",
+            "SettingsContent.kt",
+            "HandTrackingService.kt",
+            "VrHomeActivity.kt",
+        )
+        val cyrillicString = Regex("\"(?:\\\\.|[^\"\\\\])*[А-Яа-яЁё](?:\\\\.|[^\"\\\\])*\"")
+        val translatedPrefix = Regex("""tr\s*\(\s*$""")
+        val hardcoded = criticalFiles.flatMap { name ->
+            val source = File(sourceDir, name).readText()
+            cyrillicString.findAll(source).mapNotNull { match ->
+                val prefix = source.substring(maxOf(0, match.range.first - 16), match.range.first)
+                if (translatedPrefix.containsMatchIn(prefix)) null
+                else {
+                    val line = source.take(match.range.first).count { it == '\n' } + 1
+                    "$name:$line ${match.value}"
+                }
+            }.toList()
+        }
+
+        assertTrue("Hard-coded Cyrillic UI literals: $hardcoded", hardcoded.isEmpty())
     }
 
     @Test
