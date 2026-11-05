@@ -24,6 +24,7 @@ class CriticalEnglishCoverageTest {
             "HandTrackingService.kt",
             "KeyboardPanel.kt",
             "VrHomeActivity.kt",
+            "MainActivity.kt",
         )
         val translatedLabels = criticalFiles.flatMap { name ->
             Regex("tr\\(\"([^\"]+)\"\\)")
@@ -44,6 +45,7 @@ class CriticalEnglishCoverageTest {
             "SettingsContent.kt",
             "HandTrackingService.kt",
             "VrHomeActivity.kt",
+            "MainActivity.kt",
         )
         val cyrillicString = Regex("\\\"[^\\\"]*?[А-Яа-яЁё][^\\\"]*?\\\"")
         val translatedPrefix = Regex("""tr\s*\(\s*$""")
