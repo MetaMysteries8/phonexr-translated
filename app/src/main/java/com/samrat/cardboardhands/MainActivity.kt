@@ -101,7 +101,7 @@ class MainActivity : ComponentActivity() {
         } else {
             ipd = mm
             Settings.setIpdMm(this, mm)
-            status = "Профиль Cardboard применён: $mm мм"
+            status = "${tr("Профиль Cardboard применён:")} $mm ${tr("мм")}"
         }
     }
     /** The VR home needs the camera (passthrough, hands) and the gallery (Spatial Photos). */
@@ -129,7 +129,7 @@ class MainActivity : ComponentActivity() {
             runOnUiThread {
                 modProgress.remove(item.path)
                 file.onSuccess { MinecraftMods.install(this, it)?.let { problem -> error = problem } }
-                    .onFailure { error = "«${item.title}» не скачался" }
+                    .onFailure { error = "${tr("Не удалось скачать")} «${item.title}»" }
             }
         }.start()
     }
@@ -246,7 +246,7 @@ class MainActivity : ComponentActivity() {
         }
         update?.let { found ->
             HigAlert(
-                title = "Доступно PhoneXR ${found.version}",
+                title = "${tr("Доступно обновление PhoneXR")} ${found.version}",
                 message = Updates.formatSize(found.size),
                 actions = listOf(
                     HigAction(tr("Позже"), HigActionStyle.CANCEL) { update = null },
@@ -408,7 +408,7 @@ class MainActivity : ComponentActivity() {
     private fun HigScope.GameRow(game: GameLibrary.Game) {
         HigItem(
             title = game.label,
-            details = listOf(GameLibrary.describe(game) + if (game.checksPurchase) " · проверка покупки Oculus" else ""),
+            details = listOf(GameLibrary.describe(game) + if (game.checksPurchase) " · ${tr("проверка покупки Oculus")}" else ""),
             detailColor = if (game.kind == GameLibrary.Kind.VRAPI_ORIGINAL || game.kind == GameLibrary.Kind.OPENXR_ORIGINAL)
                 HigColors.accent else Color.Unspecified,
             icon = { AppIcon(game.packageName) },
@@ -460,7 +460,7 @@ class MainActivity : ComponentActivity() {
                 footer = tr("Дополнения, наборы ресурсов и миры для Minecraft Bedrock (.mcaddon, .mcpack, .mcworld). " +
                     tr("Minecraft сам импортирует мод, потом включите его в настройках мира."))
             ) {
-                HigLink("PhoneXR VR — VR для Minecraft", value = if (resumes >= 0 && MinecraftBridge.modInstalled(this@MainActivity)) "✓" else tr("Установить")) {
+                HigLink(tr("PhoneXR VR — VR для Minecraft"), value = if (resumes >= 0 && MinecraftBridge.modInstalled(this@MainActivity)) "✓" else tr("Установить")) {
                     MinecraftBridge.installMod(this@MainActivity)?.let { error = it }
                 }
                 HigLink(tr("Установить мод из файла")) { chooseMod.launch(arrayOf("*/*")) }
@@ -531,16 +531,16 @@ class MainActivity : ComponentActivity() {
         val installed = resumes >= 0 && isInstalled(mode.packageName)
         val ready = shizuku == VirtualScreen.Access.READY
         val steps = listOf(
-                        (if (installed) "✓ " else "1. ") + "Установите ${mode.game} из Google Play.",
-                        (if (ready) "✓ " else "2. ") + "Установите и запустите Shizuku (через отладку по Wi‑Fi), разрешите доступ PhoneXR.",
-                        "3. Нажмите «Играть»: игра откроется на большом экране — ${mode.scene}.",
-                        if (mode.packageName == MINECRAFT)
-                            "4. Мод PhoneXR VR ставится в Minecraft сам при первом «Играть». В Minecraft: Настройки → Общие → " +
-                                "выключите «Требовать зашифрованные веб‑сокеты»; в мире включите читы и набор параметров поведения «PhoneXR VR». " +
-                                "В мире покажите ладонь к лицу и сведите пальцы — PhoneXR подключит мод. Дальше: голова — взгляд на 360°, " +
-                                "руки видны в мире, кулак — ломать и бить, щипок — поставить блок, «пистолет» из пальцев — идти."
-                        else "4. Управление: щипок любой руки — нажатие по экрану, две руки — два пальца. " +
-                            "Joy‑Con и геймпад работают как в самой игре. Тап по телефону выравнивает вид.",
+            (if (installed) "✓ " else "1. ") + tr("Установите") + " ${mode.game} " + tr("из Google Play."),
+            (if (ready) "✓ " else "2. ") + tr("Установите и запустите Shizuku (через отладку по Wi‑Fi), разрешите доступ PhoneXR."),
+            "3. " + tr("Нажмите «Играть»: игра откроется на большом экране —") + " ${tr(mode.scene)}.",
+            if (mode.packageName == MINECRAFT)
+                tr("4. Мод PhoneXR VR ставится в Minecraft сам при первом «Играть». В Minecraft: Настройки → Общие → ") +
+                    tr("выключите «Требовать зашифрованные веб‑сокеты»; в мире включите читы и набор параметров поведения «PhoneXR VR». ") +
+                    tr("В мире покажите ладонь к лицу и сведите пальцы — PhoneXR подключит мод. Дальше: голова — взгляд на 360°, ") +
+                    tr("руки видны в мире, кулак — ломать и бить, щипок — поставить блок, «пистолет» из пальцев — идти.")
+            else tr("4. Управление: щипок любой руки — нажатие по экрану, две руки — два пальца. ") +
+                tr("Joy‑Con и геймпад работают как в самой игре. Тап по телефону выравнивает вид."),
         )
         val next = when {
             !installed -> HigAction(tr("Скачать")) {
@@ -555,7 +555,7 @@ class MainActivity : ComponentActivity() {
             }
             mode.packageName == MINECRAFT && !MinecraftBridge.modInstalled(this@MainActivity) -> HigAction(tr("Установить мод")) {
                 guide = null
-                // First time: Minecraft imports the VR mod, then "Играть" starts VR.
+                // First time: Minecraft imports the VR mod, then Play starts VR.
                 MinecraftBridge.installMod(this@MainActivity)?.let { error = it }
             }
             else -> HigAction(tr("Играть")) {
@@ -564,7 +564,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         HigAlert(
-            title = "Как включить ${mode.title}",
+            title = "${tr("Как включить")} ${mode.title}",
             message = steps.joinToString("\n"),
             actions = listOf(HigAction(tr("Закрыть"), HigActionStyle.CANCEL) { guide = null }, next),
             onDismiss = { guide = null }
@@ -586,7 +586,7 @@ class MainActivity : ComponentActivity() {
                 when {
                     progress == null -> HigText(tr("Загрузить"), color = HigColors.accent)
                     progress < 0f -> HigSpinner()
-                    progress >= 1f -> HigText("Подготовка…")
+                    progress >= 1f -> HigText(tr("Подготовка…"))
                     else -> HigText("${(progress * 100).roundToInt()}%")
                 }
             },
@@ -642,7 +642,7 @@ class MainActivity : ComponentActivity() {
     private fun downloadAndInstall(item: GameStore.Item) {
         // Internal installs use the same shell service that runs phone apps in PhoneXR windows.
         if (VirtualScreen.access() != VirtualScreen.Access.READY) {
-            error = "Для внутренней установки запустите Shizuku и разрешите доступ PhoneXR."
+            error = tr("Для внутренней установки запустите Shizuku и разрешите доступ PhoneXR.")
             return
         }
         downloads[item.path] = 0f
@@ -665,7 +665,7 @@ class MainActivity : ComponentActivity() {
                 android.util.Log.e("PhoneXR-Store", "Download failed: ${item.path}", failure)
                 runOnUiThread {
                     downloads.remove(item.path)
-                    error = "«${item.title}» не скачалась: " +
+                    error = "${tr("Не удалось скачать")} «${item.title}»: " +
                         (failure.localizedMessage ?: failure.javaClass.simpleName)
                 }
             }
@@ -673,9 +673,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun formatSize(bytes: Long): String = when {
-        bytes >= 1L shl 30 -> "%.1f ГБ".format(bytes / (1L shl 30).toDouble())
-        bytes >= 1L shl 20 -> "%.0f МБ".format(bytes / (1L shl 20).toDouble())
-        else -> "%.0f КБ".format(bytes / 1024.0)
+        bytes >= 1L shl 30 -> "%.1f ${tr("ГБ")}".format(bytes / (1L shl 30).toDouble())
+        bytes >= 1L shl 20 -> "%.0f ${tr("МБ")}".format(bytes / (1L shl 20).toDouble())
+        else -> "%.0f ${tr("КБ")}".format(bytes / 1024.0)
     }
 
     // ---------------------------------------------------------------- Settings
@@ -913,18 +913,20 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun PatchDialog(game: GameLibrary.Game) {
         val about = if (game.kind == GameLibrary.Kind.VRAPI_ORIGINAL)
-            "Это игра ${game.headset.title} на VrApi: без самой гарнитуры и драйвера Oculus она сразу закрывается. " +
-                "PhoneXR заменит в ней libvrapi.so переходником на OpenXR"
-        else "Это сборка ${game.headset.title}: на телефоне она не находит рантайм OpenXR и показывает чёрный экран. " +
-            "PhoneXR откроет ей доступ к рантайму PhoneXR"
+            tr("Это игра") + " ${game.headset.title} " +
+                tr("на VrApi: без самой гарнитуры и драйвера Oculus она сразу закрывается. ") +
+                tr("PhoneXR заменит в ней libvrapi.so переходником на OpenXR")
+        else tr("Это сборка") + " ${game.headset.title}: " +
+            tr("на телефоне она не находит рантайм OpenXR и показывает чёрный экран. ") +
+            tr("PhoneXR откроет ей доступ к рантайму PhoneXR")
         HigAlert(
-            title = "Пропатчить «${game.label}»?",
-            message = about + ", впишет новый трекинг и оптимизирует сборку под телефон, " +
-                "а потом подпишет своей подписью. " +
-                "Оригинал придётся удалить (подпись другая), сохранения игры при этом пропадут.",
+            title = "${tr("Пропатчить")} «${game.label}»?",
+            message = about + tr(", впишет новый трекинг и оптимизирует сборку под телефон, ") +
+                tr("а потом подпишет своей подписью. ") +
+                tr("Оригинал придётся удалить (подпись другая), сохранения игры при этом пропадут."),
             actions = listOf(
                 HigAction(tr("Отмена"), HigActionStyle.CANCEL) { pendingPatch = null },
-                HigAction("Пропатчить") {
+                HigAction(tr("Пропатчить")) {
                     pendingPatch = null
                     patch(Uri.fromFile(game.apk), replaces = game)
                 }
@@ -939,18 +941,18 @@ class MainActivity : ComponentActivity() {
         val stale = value.replacesPackage?.takeIf { resumes >= 0 && isInstalled(it) }
         // Without the runtime the game starts into a black screen, whatever the patch did.
         val runtime = if (PhoneXrRuntime.state(this) == PhoneXrRuntime.State.READY) "" else
-            "\n\nЧтобы вместо игры не был чёрный экран, установите PhoneXR Runtime в меню и выберите его " +
-                "в OpenXR Runtime Broker."
+            "\n\n" + tr("Чтобы вместо игры не был чёрный экран, установите PhoneXR Runtime в меню и выберите его ") +
+                tr("в OpenXR Runtime Broker.")
         HigAlert(
-            title = value.label?.let { "«$it» готова" }
-                ?: if (value.result.vrApi) "Игра ${value.result.headset.title} готова" else "Сборка готова",
+            title = value.label?.let { "«$it» ${tr("готова")}" }
+                ?: if (value.result.vrApi) "${tr("Игра")} ${value.result.headset.title} ${tr("готова")}" else tr("Сборка готова"),
             message = value.result.changes.joinToString("\n") { "• $it" } + runtime +
-                if (stale != null) "\n\nУстановлена версия с другой подписью: сначала удалите её, " +
-                    "затем нажмите «Установить». Сохранения игры пропадут." else "",
+                if (stale != null) "\n\n" + tr("Установлена версия с другой подписью: сначала удалите её, ") +
+                    tr("затем нажмите «Установить». Сохранения игры пропадут.") else "",
             actions = listOf(
                 HigAction(tr("Позже"), HigActionStyle.CANCEL) { ready = null },
-                if (stale != null) HigAction("Удалить старую", HigActionStyle.DESTRUCTIVE) { uninstall(stale) }
-                else HigAction("Установить") {
+                if (stale != null) HigAction(tr("Удалить старую"), HigActionStyle.DESTRUCTIVE) { uninstall(stale) }
+                else HigAction(tr("Установить")) {
                     ready = null
                     install(value.result)
                 }
@@ -964,15 +966,15 @@ class MainActivity : ComponentActivity() {
             GameLibrary.Kind.VRAPI_ORIGINAL, GameLibrary.Kind.OPENXR_ORIGINAL -> pendingPatch = game
             GameLibrary.Kind.DAYDREAM -> {
                 if (!Daydream.servicesInstalled(this) && Daydream.bundled(this)) {
-                    status = "Сначала установите Opendream Services, затем снова откройте игру"
+                    status = tr("Сначала установите Opendream Services, затем снова откройте игру")
                     Daydream.installServices(this)
                 } else {
                     requestStart(game)
                 }
             }
             GameLibrary.Kind.VRAPI_UNSUPPORTED -> error =
-                "«${game.label}» — игра ${game.headset.title}, которую PhoneXR запустить не может: " +
-                    "у неё нет сборки для ARM (arm64-v8a или armeabi-v7a)."
+                "${tr("Не удаётся запустить")} «${game.label}» (${game.headset.title}): " +
+                    tr("нет сборки для ARM (arm64-v8a или armeabi-v7a).")
             else -> requestStart(game)
         }
     }
@@ -993,16 +995,16 @@ class MainActivity : ComponentActivity() {
         if (gameToStart?.let { GameLibrary.ownsHandTracking(this, it.packageName) } == true) {
             // The game tracks hands itself: PhoneXR declines and leaves the camera to it.
             stopService(Intent(this, HandTrackingService::class.java))
-            status = "Руки отслеживает сама игра"
+            status = tr("Руки отслеживает сама игра")
         } else {
             ContextCompat.startForegroundService(this, Intent(this, HandTrackingService::class.java))
-            status = "Камера рук включена"
+            status = tr("Камера рук включена")
         }
         val game = gameToStart ?: return
         gameToStart = null
         val intent = GameLibrary.launchIntent(this, game)
         if (intent == null) {
-            error = "У «${game.label}» нет экрана запуска"
+            error = "${tr("Нет экрана запуска для")} «${game.label}»"
             return
         }
         startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -1010,10 +1012,10 @@ class MainActivity : ComponentActivity() {
 
     private fun patch(uri: Uri, replaces: GameLibrary.Game?, label: String? = replaces?.label) {
         if (replaces?.hasSplits == true) {
-            error = "«${replaces.label}» установлена из нескольких APK (split). Такую игру установите из исходного файла."
+            error = "«${replaces.label}»: ${tr("игра установлена из нескольких APK (split). Установите её из исходного файла.")}"
             return
         }
-        busy = "Подготовка…"
+        busy = tr("Подготовка…")
         Thread {
             try {
                 val payload = PxrPackage.androidPayload(this, uri)
@@ -1048,15 +1050,15 @@ class MainActivity : ComponentActivity() {
     /** Installs the prepared game inside the PhoneXR flow, without opening the APK installer UI. */
     private fun installApk(file: File) {
         signatureConflict(file)?.let { conflict ->
-            error = "Эта игра уже установлена с другой подписью ($conflict). Удалите её и скачайте снова."
+            error = "${tr("Эта игра уже установлена с другой подписью")} ($conflict). ${tr("Удалите её и скачайте снова.")}"
             return
         }
-        busy = "Установка внутри PhoneXR…"
+        busy = tr("Установка внутри PhoneXR…")
         InternalInstaller.install(this, file) { problem ->
             busy = null
             if (problem != null) error = problem
             else {
-                status = "Игра добавлена в PhoneXR"
+                status = tr("Игра добавлена в PhoneXR")
                 refreshGames()
             }
         }
@@ -1084,9 +1086,9 @@ class MainActivity : ComponentActivity() {
         private const val KEY_TAB = "tab"
         private const val MINECRAFT = "com.mojang.minecraftpe"
         private val VR_MODES = listOf(
-            VrMode("Minecraft VR", "Minecraft", MINECRAFT, "Bedrock в гостиной с камином", "гостиная из Minecraft VR", CinemaActivity.SCENE_ROOM),
-            VrMode("Roblox VR", "Roblox", "com.roblox.client", "Roblox на экране в VR", "небо вокруг экрана", CinemaActivity.SCENE_ROBLOX),
-            VrMode("Brawl Stars VR", "Brawl Stars", "com.supercell.brawlstars", "Brawl Stars на экране в VR", "небо вокруг экрана", CinemaActivity.SCENE_BRAWL),
+            VrMode("Minecraft VR", "Minecraft", MINECRAFT, "Bedrock in a fireplace lounge", "a Minecraft VR lounge", CinemaActivity.SCENE_ROOM),
+            VrMode("Roblox VR", "Roblox", "com.roblox.client", "Roblox on a VR screen", "sky around the screen", CinemaActivity.SCENE_ROBLOX),
+            VrMode("Brawl Stars VR", "Brawl Stars", "com.supercell.brawlstars", "Brawl Stars on a VR screen", "sky around the screen", CinemaActivity.SCENE_BRAWL),
         )
         /** Height of the floating tab bar plus its margin. */
         private val TAB_BAR_ROOM = 120.dp
