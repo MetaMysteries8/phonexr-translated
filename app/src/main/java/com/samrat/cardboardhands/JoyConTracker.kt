@@ -175,9 +175,9 @@ class JoyConTracker(context: Context) : AutoCloseable, InputManager.InputDeviceL
     }
 
     private fun sensorName(sensor: Sensor) = when (sensor.type) {
-        Sensor.TYPE_GYROSCOPE -> "гироскоп"
-        Sensor.TYPE_ACCELEROMETER -> "акселерометр"
-        Sensor.TYPE_GAME_ROTATION_VECTOR, Sensor.TYPE_ROTATION_VECTOR -> "ориентация"
+        Sensor.TYPE_GYROSCOPE -> "gyroscope"
+        Sensor.TYPE_ACCELEROMETER -> "accelerometer"
+        Sensor.TYPE_GAME_ROTATION_VECTOR, Sensor.TYPE_ROTATION_VECTOR -> "orientation"
         else -> sensor.stringType.substringAfterLast('.')
     }
 

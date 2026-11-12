@@ -66,13 +66,13 @@ class GyroTestActivity : ComponentActivity() {
             }
         }
         HigPage(
-            title = "Гироскоп Joy‑Con",
+            title = tr("Гироскоп Joy‑Con"),
             onBack = ::finish,
-            subtitle = "Поверните Joy‑Con — куб повторит поворот, а скорость вращения покажет, что данные идут."
+            subtitle = tr("Поверните Joy‑Con — куб повторит поворот, а скорость вращения покажет, что данные идут.")
         ) {
             if (Build.VERSION.SDK_INT < 31) {
-                HigSection(footer = "Датчики Joy‑Con Android отдаёт приложениям только с Android 12.") {
-                    HigRow("Нужен Android 12 или новее", detailColor = HigColors.bad)
+                HigSection(footer = tr("Датчики Joy‑Con Android отдаёт приложениям только с Android 12.")) {
+                    HigRow(tr("Нужен Android 12 или новее"), detailColor = HigColors.bad)
                 }
                 return@HigPage
             }
@@ -85,13 +85,13 @@ class GyroTestActivity : ComponentActivity() {
                 Cube(left, leftMotion, Modifier.weight(1f))
                 Cube(right, rightMotion, Modifier.weight(1f))
             }
-            JoyConSection("Левый Joy‑Con", leftMotion)
-            JoyConSection("Правый Joy‑Con", rightMotion)
-            HigButton("Выровнять", filled = false) { tracker?.recenter() }
+            JoyConSection(tr("Левый Joy‑Con"), leftMotion)
+            JoyConSection(tr("Правый Joy‑Con"), rightMotion)
+            HigButton(tr("Выровнять"), filled = false) { tracker?.recenter() }
             HigSection(
-                footer = "Держите оба Joy‑Con прямо и нажмите «Выровнять». Если датчики не найдены, ядро телефона " +
-                    "не отдаёт гироскоп Joy‑Con (так бывает, например, на Samsung с ядром 5.10) — " +
-                    "тогда поворот руки берётся только с камеры."
+                footer = tr("Держите оба Joy‑Con прямо и нажмите «Выровнять». Если датчики не найдены, ядро телефона ") +
+                    tr("не отдаёт гироскоп Joy‑Con (так бывает, например, на Samsung с ядром 5.10) — ") +
+                    tr("тогда поворот руки берётся только с камеры.")
             ) {}
         }
     }
@@ -100,20 +100,20 @@ class GyroTestActivity : ComponentActivity() {
     private fun JoyConSection(title: String, motion: JoyConTracker.Motion) {
         val verdict = verdict(motion)
         HigSection(title = title) {
-            HigRow("Состояние", verdict.first, detailColor = verdict.second)
-            HigRow("Датчики", motion.sensors.ifEmpty { listOf("нет") }.joinToString(", "))
-            HigRow("Частота", "${motion.rateHz.roundToInt()} Гц · событий ${motion.events}")
-            HigRow("Скорость вращения", "${motion.degreesPerSecond.roundToInt()}°/с")
+            HigRow(tr("Состояние"), verdict.first, detailColor = verdict.second)
+            HigRow(tr("Датчики"), motion.sensors.ifEmpty { listOf(tr("нет")) }.joinToString(", "))
+            HigRow(tr("Частота"), "${motion.rateHz.roundToInt()} ${tr("Гц")} · ${tr("событий")} ${motion.events}")
+            HigRow(tr("Скорость вращения"), "${motion.degreesPerSecond.roundToInt()}°/${tr("с")}")
         }
     }
 
     @Composable
     private fun verdict(motion: JoyConTracker.Motion): Pair<String, Color> = when {
-        !motion.connected -> "Не подключён — подключите по Bluetooth" to HigColors.secondary
-        motion.sensors.none { it == "гироскоп" || it == "ориентация" } ->
-            "Подключён, но гироскопа нет" to HigColors.bad
-        motion.rateHz < 1f -> "Гироскоп есть, но данные не приходят" to HigColors.bad
-        else -> "Гироскоп работает" to HigColors.good
+        !motion.connected -> tr("Не подключён — подключите по Bluetooth") to HigColors.secondary
+        motion.sensors.none { it == "gyroscope" || it == "orientation" } ->
+            tr("Подключён, но гироскопа нет") to HigColors.bad
+        motion.rateHz < 1f -> tr("Гироскоп есть, но данные не приходят") to HigColors.bad
+        else -> tr("Гироскоп работает") to HigColors.good
     }
 
     @Composable

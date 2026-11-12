@@ -25,13 +25,17 @@ class CriticalEnglishCoverageTest {
             "KeyboardPanel.kt",
             "VrHomeActivity.kt",
             "MainActivity.kt",
+            "ControllerActivity.kt",
+            "GyroTestActivity.kt",
+            "JoyConCameraActivity.kt",
+            "HandTestActivity.kt",
         )
         val translatedLabels = criticalFiles.flatMap { name ->
             Regex("tr\\(\"([^\"]+)\"\\)")
                 .findAll(File(sourceDir, name).readText())
                 .map { it.groupValues[1] }
                 .toList()
-        }.toSet()
+        }.toSet() + JoyConVision.Target.PRESETS.map { it.first }
 
         val missing = translatedLabels.filterNot(englishKeys::contains).sorted()
         assertTrue("Missing English translations: $missing", missing.isEmpty())
@@ -46,6 +50,10 @@ class CriticalEnglishCoverageTest {
             "HandTrackingService.kt",
             "VrHomeActivity.kt",
             "MainActivity.kt",
+            "ControllerActivity.kt",
+            "GyroTestActivity.kt",
+            "JoyConCameraActivity.kt",
+            "HandTestActivity.kt",
         )
         val cyrillicString = Regex("\\\"[^\\\"]*?[А-Яа-яЁё][^\\\"]*?\\\"")
         val translatedPrefix = Regex("""tr\s*\(\s*$""")

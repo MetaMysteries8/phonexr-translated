@@ -29,7 +29,7 @@ class HandTestActivity : ComponentActivity() {
         cameraView = CardboardCameraView(this)
         root.addView(cameraView, FrameLayout.LayoutParams(-1, -1))
         label = TextView(this).apply {
-            text = "Покажите обе руки камере"
+            text = tr("Покажите обе руки камере")
             textSize = 16f
             setTextColor(Color.WHITE)
             setBackgroundColor(0x99000000.toInt())
@@ -39,7 +39,7 @@ class HandTestActivity : ComponentActivity() {
         setContentView(root)
         tracker = HandTracker(this) { result ->
             cameraView.updateHands(result)
-            runOnUiThread { label.text = "Найдено рук: ${result.landmarks().size}" }
+            runOnUiThread { label.text = "${tr("Найдено рук:")} ${result.landmarks().size}" }
         }
         bindCamera()
     }
