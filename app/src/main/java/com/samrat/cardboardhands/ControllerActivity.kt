@@ -76,25 +76,25 @@ class ControllerActivity : ComponentActivity() {
 
     @Composable
     private fun Screen() {
-        HigPage(title = "Контроллер", onBack = ::finish, subtitle = "Наведите телефон на экран в шлеме, как пультом.") {
+        HigPage(title = tr("Контроллер"), onBack = ::finish, subtitle = tr("Наведите телефон на экран в шлеме, как пультом.")) {
             HigSection(
-                title = "Связь",
-                footer = "Оба телефона должны быть в одной сети Wi‑Fi. Шлем сам ловит этот телефон — " +
-                    "ничего вводить не нужно."
+                title = tr("Связь"),
+                footer = tr("Оба телефона должны быть в одной сети Wi‑Fi. Шлем сам ловит этот телефон — ") +
+                    tr("ничего вводить не нужно.")
             ) {
-                HigRow("Отправлено пакетов", if (sent > 0) "$sent" else "…", detailColor = if (sent > 0) HigColors.good else HigColors.secondary)
+                HigRow(tr("Отправлено пакетов"), if (sent > 0) "$sent" else "…", detailColor = if (sent > 0) HigColors.good else HigColors.secondary)
             }
 
             HigSection(
-                title = "Кнопки",
-                footer = "«Навести на центр» совмещает направление телефона с центром экрана: " +
-                    "нажмите её, держа телефон на экран. Курок — нажатие в том месте, куда смотрит телефон."
+                title = tr("Кнопки"),
+                footer = tr("«Навести на центр» совмещает направление телефона с центром экрана: ") +
+                    tr("нажмите её, держа телефон на экран. Курок — нажатие в том месте, куда смотрит телефон.")
             ) {
-                HigLink("Навести на центр") {
+                HigLink(tr("Навести на центр")) {
                     press(true, PhoneController.RECENTER)
                     window.decorView.postDelayed({ press(false, PhoneController.RECENTER) }, 200)
                 }
-                HigLink("Назад") {
+                HigLink(tr("Назад")) {
                     press(true, PhoneController.BACK)
                     window.decorView.postDelayed({ press(false, PhoneController.BACK) }, 200)
                 }
@@ -120,8 +120,8 @@ class ControllerActivity : ComponentActivity() {
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    HigText(if (trigger) "Нажато" else "Курок", color = if (trigger) Color.White else HigColors.label)
-                    HigText("держите, чтобы вести", color = if (trigger) Color.White else HigColors.secondary)
+                    HigText(if (trigger) tr("Нажато") else tr("Курок"), color = if (trigger) Color.White else HigColors.label)
+                    HigText(tr("держите, чтобы вести"), color = if (trigger) Color.White else HigColors.secondary)
                 }
             }
         }

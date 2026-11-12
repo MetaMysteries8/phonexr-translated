@@ -61,7 +61,7 @@ class JoyConCameraActivity : ComponentActivity() {
     private var message by mutableStateOf<String?>(null)
 
     private val requestCamera = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) bindCamera() else message = "Нужен доступ к камере"
+        if (granted) bindCamera() else message = tr("Нужен доступ к камере")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -134,11 +134,11 @@ class JoyConCameraActivity : ComponentActivity() {
             val target = vision.sample(frame)
             runOnUiThread {
                 if (target == null) {
-                    message = "В квадрате не найден яркий цвет. Серые и чёрные Joy‑Con по цвету не отследить."
+                    message = tr("В квадрате не найден яркий цвет. Серые и чёрные Joy‑Con по цвету не отследить.")
                 } else {
                     val shaped = target.copy(sideRatio = (if (isLeft) state.leftColor else state.rightColor).sideRatio)
                     update(if (isLeft) state.copy(leftColor = shaped) else state.copy(rightColor = shaped))
-                    message = "Цвет ${if (isLeft) "левого" else "правого"} Joy‑Con запомнен"
+                    message = if (isLeft) tr("Цвет левого Joy‑Con запомнен") else tr("Цвет правого Joy‑Con запомнен")
                 }
             }
         }
@@ -151,11 +151,11 @@ class JoyConCameraActivity : ComponentActivity() {
             val ratio = vision.measureSideRatio(frame, target)
             runOnUiThread {
                 if (ratio == null) {
-                    message = "Joy‑Con не виден боком. Держите его целиком в кадре, длинной стороной к камере."
+                    message = tr("Joy‑Con не виден боком. Держите его целиком в кадре, длинной стороной к камере.")
                 } else {
                     val shaped = target.copy(sideRatio = ratio)
                     update(if (isLeft) state.copy(leftColor = shaped) else state.copy(rightColor = shaped))
-                    message = "Форма запомнена: длина больше толщины в ${"%.1f".format(ratio)} раза"
+                    message = "${tr("Форма запомнена: длина больше толщины в")} ${"%.1f".format(ratio)} ${tr("раза")}"
                 }
             }
         }
@@ -165,65 +165,65 @@ class JoyConCameraActivity : ComponentActivity() {
     @Composable
     private fun Screen() {
         HigPage(
-            title = "Joy‑Con через камеру",
+            title = tr("Joy‑Con через камеру"),
             onBack = ::finish,
-            subtitle = "Камера находит Joy‑Con по цвету: откуда он и куда направлен. Кнопки и стики — с самого Joy‑Con."
+            subtitle = tr("Камера находит Joy‑Con по цвету: откуда он и куда направлен. Кнопки и стики — с самого Joy‑Con.")
         ) {
             CameraPreview()
 
             HigSection(footer = message) {
-                HigSwitchRow("Отслеживать Joy‑Con камерой", state.cameraJoyCons) { update(state.copy(cameraJoyCons = it)) }
-                HigRow("Левый", describe(left), detailColor = if (left.found) HigColors.good else HigColors.bad)
-                HigRow("Правый", describe(right), detailColor = if (right.found) HigColors.good else HigColors.bad)
+                HigSwitchRow(tr("Отслеживать Joy‑Con камерой"), state.cameraJoyCons) { update(state.copy(cameraJoyCons = it)) }
+                HigRow(tr("Левый"), describe(left), detailColor = if (left.found) HigColors.good else HigColors.bad)
+                HigRow(tr("Правый"), describe(right), detailColor = if (right.found) HigColors.good else HigColors.bad)
             }
 
             HigSection(
-                title = "Цвет",
-                footer = "Держите Joy‑Con так, чтобы он закрыл квадрат в центре кадра, и нажмите. " +
-                    "Если оба Joy‑Con одного цвета, левым считается тот, что левее в кадре."
+                title = tr("Цвет"),
+                footer = tr("Держите Joy‑Con так, чтобы он закрыл квадрат в центре кадра, и нажмите. ") +
+                    tr("Если оба Joy‑Con одного цвета, левым считается тот, что левее в кадре.")
             ) {
-                HigLink("Запомнить цвет левого") { rememberColor(isLeft = true) }
-                HigLink("Запомнить цвет правого") { rememberColor(isLeft = false) }
-                HigLink("Неоновые синий и красный") {
+                HigLink(tr("Запомнить цвет левого")) { rememberColor(isLeft = true) }
+                HigLink(tr("Запомнить цвет правого")) { rememberColor(isLeft = false) }
+                HigLink(tr("Неоновые синий и красный")) {
                     update(state.copy(leftColor = JoyConVision.Target.NEON_BLUE, rightColor = JoyConVision.Target.NEON_RED))
-                    message = "Стандартные цвета восстановлены"
+                    message = tr("Стандартные цвета восстановлены")
                 }
             }
 
             HigSection(
-                title = "Цвет левого Joy‑Con",
-                footer = "Выберите цвет своего Joy‑Con — учить камеру тогда не нужно. Серые и белые Joy‑Con " +
-                    "в списке нет: камера находит их по цвету, а у этих его нет — для них нажмите «запомнить цвет»."
+                title = tr("Цвет левого Joy‑Con"),
+                footer = tr("Выберите цвет своего Joy‑Con — учить камеру тогда не нужно. Серые и белые Joy‑Con ") +
+                    tr("в списке нет: камера находит их по цвету, а у этих его нет — для них нажмите «запомнить цвет».")
             ) {
                 JoyConVision.Target.PRESETS.forEach { (title, colour) ->
-                    HigChoice(title, null, sameColour(state.leftColor, colour)) {
+                    HigChoice(tr(title), null, sameColour(state.leftColor, colour)) {
                         update(state.copy(leftColor = colour))
-                        message = "Левый Joy‑Con: $title"
+                        message = "${tr("Левый Joy‑Con:")} ${tr(title)}"
                     }
                 }
             }
 
-            HigSection(title = "Цвет правого Joy‑Con") {
+            HigSection(title = tr("Цвет правого Joy‑Con")) {
                 JoyConVision.Target.PRESETS.forEach { (title, colour) ->
-                    HigChoice(title, null, sameColour(state.rightColor, colour)) {
+                    HigChoice(tr(title), null, sameColour(state.rightColor, colour)) {
                         update(state.copy(rightColor = colour))
-                        message = "Правый Joy‑Con: $title"
+                        message = "${tr("Правый Joy‑Con:")} ${tr(title)}"
                     }
                 }
             }
 
             HigSection(
-                title = "Форма",
-                footer = "Нужно для точного наклона. Держите Joy‑Con целиком в кадре длинной стороной к камере и нажмите."
+                title = tr("Форма"),
+                footer = tr("Нужно для точного наклона. Держите Joy‑Con целиком в кадре длинной стороной к камере и нажмите.")
             ) {
-                HigLink("Запомнить форму левого") { rememberShape(isLeft = true) }
-                HigLink("Запомнить форму правого") { rememberShape(isLeft = false) }
+                HigLink(tr("Запомнить форму левого")) { rememberShape(isLeft = true) }
+                HigLink(tr("Запомнить форму правого")) { rememberShape(isLeft = false) }
             }
 
             HigSection(
-                footer = "Ограничения: нужен свет и цветные Joy‑Con, поворот вокруг собственной оси Joy‑Con камера " +
-                    "не видит, а вне кадра Joy‑Con остаётся на последнем месте. Если гироскоп Joy‑Con заработает, " +
-                    "поворот автоматически будет браться из него."
+                footer = tr("Ограничения: нужен свет и цветные Joy‑Con, поворот вокруг собственной оси Joy‑Con камера ") +
+                    tr("не видит, а вне кадра Joy‑Con остаётся на последнем месте. Если гироскоп Joy‑Con заработает, ") +
+                    tr("поворот автоматически будет браться из него.")
             ) {}
         }
     }
@@ -278,9 +278,9 @@ class JoyConCameraActivity : ComponentActivity() {
     }
 
     private fun describe(detection: JoyConVision.Detection): String {
-        if (!detection.found) return "не виден"
+        if (!detection.found) return tr("не виден")
         val fromForward = Math.toDegrees(acos((-detection.dirZ).coerceIn(-1f, 1f).toDouble())).roundToInt()
         val distance = ((0.08f - detection.thickness) / 0.06f).coerceIn(0f, 1f)
-        return "виден · отклонение от «вперёд» $fromForward° · дальность ${(distance * 100).roundToInt()}%"
+        return "${tr("виден")} · ${tr("отклонение от «вперёд»")} $fromForward° · ${tr("дальность")} ${(distance * 100).roundToInt()}%"
     }
 }
