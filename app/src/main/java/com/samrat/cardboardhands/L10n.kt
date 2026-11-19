@@ -436,6 +436,8 @@ object L10n {
         "вперёд" to "forward", "вбок" to "sideways", "Кнопка" to "Button", "на глаз" to "per eye", "мм" to "mm",
         "Установлен" to "Installed", "Подключён" to "Connected", "не установлен" to "not installed",
         "пробел" to "space",
+        "Загрузка" to "Downloading",
+        "Не удалось проверить обновления" to "Could not check for updates",
         "Joy‑Con не виден боком. Держите его целиком в кадре, длинной стороной к камере." to "The Joy-Con is not visible from the side. Keep it fully in frame with its long edge facing the camera.",
         "«Навести на центр» совмещает направление телефона с центром экрана: " to "Recenter aligns the phone’s direction with the center of the headset display: ",
         "В квадрате не найден яркий цвет. Серые и чёрные Joy‑Con по цвету не отследить." to "No bright color was found in the square. Gray and black Joy-Cons cannot be tracked by color.",

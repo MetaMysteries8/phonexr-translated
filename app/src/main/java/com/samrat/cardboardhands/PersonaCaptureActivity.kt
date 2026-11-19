@@ -40,12 +40,16 @@ class PersonaCaptureActivity : ComponentActivity() {
     private var poseIndex = 0
     private val captured = LinkedHashMap<String, Bitmap>()
 
-    private enum class Pose(val prompt: String) {
-        FRONT("Смотрите прямо"),
-        LEFT("Медленно поверните голову влево"),
-        RIGHT("Теперь поверните голову вправо"),
-        UP("Слегка поднимите подбородок"),
-        DOWN("Слегка опустите подбородок"),
+    private enum class Pose {
+        FRONT, LEFT, RIGHT, UP, DOWN;
+
+        fun prompt() = when (this) {
+            FRONT -> tr("Смотрите прямо")
+            LEFT -> tr("Медленно поверните голову влево")
+            RIGHT -> tr("Теперь поверните голову вправо")
+            UP -> tr("Слегка поднимите подбородок")
+            DOWN -> tr("Слегка опустите подбородок")
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -138,8 +142,8 @@ class PersonaCaptureActivity : ComponentActivity() {
                 when {
                     !near -> { goodFrames = 0; tr("Приблизьте лицо к камере шлема") }
                     !centred -> { goodFrames = 0; tr("Лицо в центр рамки") }
-                    !matchesPose -> { goodFrames = 0; tr(pose.prompt) }
-                    else -> { goodFrames++; "${tr(pose.prompt)} · ${poseIndex + 1}/${Pose.entries.size}" }
+                    !matchesPose -> { goodFrames = 0; pose.prompt() }
+                    else -> { goodFrames++; "${pose.prompt()} · ${poseIndex + 1}/${Pose.entries.size}" }
                 }
             }
         }
@@ -151,7 +155,7 @@ class PersonaCaptureActivity : ComponentActivity() {
             goodFrames = 0
             poseIndex++
             if (poseIndex < Pose.entries.size) {
-                setStatus(tr(Pose.entries[poseIndex].prompt))
+                setStatus(Pose.entries[poseIndex].prompt())
                 return
             }
         }

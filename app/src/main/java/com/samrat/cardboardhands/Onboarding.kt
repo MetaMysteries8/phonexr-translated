@@ -178,7 +178,7 @@ class Onboarding(private val context: Context, private val host: Host) {
             }
             Step.PINCH -> {
                 card()
-                title("Калибровка рук")
+                title(tr("Калибровка рук"))
                 body(tr("Сведите большой и указательный пальцы и разведите их. Три раза."))
                 for (i in 0 until 3) {
                     paint.color = if (i < pinches) Color.rgb(48, 209, 88) else Color.argb(80, 255, 255, 255)
