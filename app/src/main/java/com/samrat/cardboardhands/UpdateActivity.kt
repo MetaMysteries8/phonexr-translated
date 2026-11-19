@@ -38,7 +38,7 @@ import zone.ien.hig.theme.CupertinoTheme
 import kotlin.concurrent.thread
 import kotlin.math.roundToInt
 
-/** Native "Обновление ПО" screen for PhoneXR. */
+/** Native software update screen for PhoneXR. */
 class UpdateActivity : ComponentActivity() {
     private var release by mutableStateOf<Updates.Release?>(null)
     private var checking by mutableStateOf(true)
@@ -63,7 +63,7 @@ class UpdateActivity : ComponentActivity() {
             runOnUiThread {
                 checking = false
                 release = found.getOrNull()
-                error = found.exceptionOrNull()?.let { "Не удалось проверить обновления" }
+                error = found.exceptionOrNull()?.let { tr("Не удалось проверить обновления") }
             }
         }
     }
@@ -78,7 +78,7 @@ class UpdateActivity : ComponentActivity() {
             val file = runCatching { Updates.download(this, target) { value -> runOnUiThread { progress = value } } }
             runOnUiThread {
                 progress = null
-                file.onSuccess { Updates.install(this, it) }.onFailure { error = "Обновление не скачалось" }
+                file.onSuccess { Updates.install(this, it) }.onFailure { error = tr("Обновление не скачалось") }
             }
         }
     }
@@ -134,7 +134,7 @@ class UpdateActivity : ComponentActivity() {
                     when {
                         value == null -> tr("Обновить сейчас")
                         value < 0f -> tr("Загрузка…")
-                        else -> "Загрузка ${(value * 100).roundToInt()}%"
+                        else -> "${tr("Загрузка")} ${(value * 100).roundToInt()}%"
                     },
                     color = Color.White, fontWeight = FontWeight.SemiBold
                 )
