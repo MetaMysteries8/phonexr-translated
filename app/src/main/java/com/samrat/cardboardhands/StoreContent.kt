@@ -121,7 +121,7 @@ class StoreContent(private val context: Context, private val host: Host) : VrWin
                     }
                 }.getOrNull()
                 progress.remove(item.path)
-                if (file != null) host.install(file) else host.message("«${item.title}» не скачалась")
+                if (file != null) host.install(file) else host.message("${tr("Не удалось скачать")} «${item.title}»")
             }
         }
         val modCards = mods.map { item ->
@@ -138,7 +138,7 @@ class StoreContent(private val context: Context, private val host: Host) : VrWin
                     }
                 }.getOrNull()
                 progress.remove(item.path)
-                val problem = if (file != null && activity != null) MinecraftMods.install(activity, file) else "«${item.title}» не скачался"
+                val problem = if (file != null && activity != null) MinecraftMods.install(activity, file) else "${tr("Не удалось скачать")} «${item.title}»"
                 if (problem != null) host.message(problem) else host.message(tr("Мод открыт в Minecraft: подтвердите импорт"))
             }
         }
@@ -146,7 +146,7 @@ class StoreContent(private val context: Context, private val host: Host) : VrWin
             Card(app.name, app.url.removePrefix("https://").substringBefore('/'), { WebApps.icon(app) },
                 { if (WebApps.installed(context).any { it.url == app.url }) tr("Открыть") else tr("Добавить") }) {
                 if (WebApps.installed(context).any { it.url == app.url }) host.openWebApp(app)
-                else { WebApps.add(context, app); host.homeChanged(); host.message("«${app.name}» на главном экране") }
+                else { WebApps.add(context, app); host.homeChanged(); host.message("«${app.name}» ${tr("на главном экране")}") }
             }
         }
         sections = listOfNotNull(

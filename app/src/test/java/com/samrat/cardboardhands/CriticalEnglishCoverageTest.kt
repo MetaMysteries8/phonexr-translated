@@ -32,6 +32,7 @@ class CriticalEnglishCoverageTest {
             "Onboarding.kt",
             "PersonaCaptureActivity.kt",
             "UpdateActivity.kt",
+            "StoreContent.kt",
         )
         val translatedLabels = criticalFiles.flatMap { name ->
             Regex("tr\\(\"([^\"]+)\"\\)")
@@ -60,6 +61,7 @@ class CriticalEnglishCoverageTest {
             "Onboarding.kt",
             "PersonaCaptureActivity.kt",
             "UpdateActivity.kt",
+            "StoreContent.kt",
         )
         val cyrillicString = Regex("\\\"[^\\\"]*?[А-Яа-яЁё][^\\\"]*?\\\"")
         val translatedPrefix = Regex("""tr\s*\(\s*$""")

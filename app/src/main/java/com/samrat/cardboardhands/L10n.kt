@@ -436,6 +436,7 @@ object L10n {
         "вперёд" to "forward", "вбок" to "sideways", "Кнопка" to "Button", "на глаз" to "per eye", "мм" to "mm",
         "Установлен" to "Installed", "Подключён" to "Connected", "не установлен" to "not installed",
         "пробел" to "space",
+        "на главном экране" to "added to Home",
         "Загрузка" to "Downloading",
         "Не удалось проверить обновления" to "Could not check for updates",
         "Joy‑Con не виден боком. Держите его целиком в кадре, длинной стороной к камере." to "The Joy-Con is not visible from the side. Keep it fully in frame with its long edge facing the camera.",
